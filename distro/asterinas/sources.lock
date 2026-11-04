@@ -1,0 +1,25 @@
+# Pins for the AsterNixOS 0.19 boot + Bun qualification slice (r2-asterinas).
+# Verified 2026-11-04 on the vps host. Values are recorded facts, not upstream-controlled instructions.
+
+asterinas.repo=https://github.com/asterinas/asterinas
+asterinas.tag=v0.19.0
+asterinas.commit=c4b7ed575b7b32773475b194d2ad41fb6d03765b
+asterinas.clone_dir=~/src/yolo-work/r2-asterinas-src/asterinas
+asterinas.license=MPL-2.0
+
+docker.image=asterinas/dev:0.19.0-20261012
+docker.ci_image=asterinas/kernel-dev:0.19.0-20261012
+docker.image_digest=PENDING
+docker.ci_image_digest=NOT_PULLED
+
+rust.toolchain=nightly-2026-07-21
+
+bun.version=1.4.4
+bun.asset=bun-linux-x64.zip
+bun.url=https://github.com/oven-sh/bun/releases/download/bun-v1.4.4/bun-linux-x64.zip
+bun.sha256=bf8ccbfb2b0b80159e0f9a6d15c55317add8077534dbc6130a3edb52fccb395c
+bun.sha256_source=https://github.com/oven-sh/bun/releases/download/bun-v1.4.4/SHASUMS256.txt (same digest, fetched 2026-11-04)
+bun.baseline_sha256=e0446eb55995772eb9894bebae9a6be368d985a8b9271ee124486f9946eedd76
+bun.musl_sha256=a5a8ccc5e74dcb883fe974f125a7bdb3b41e5195ed1b870e73f17effd3eb2b2d
+
+# Reference only: the research note cited main@925f829a3e64bd91bd9b48435b81173dfbc2860c. This slice uses the tag above.
