@@ -19,8 +19,12 @@ Updated: 2026-11-04 (UTC, ~00:00). Branch: claude-r2-alpm. Scope: distro/alpm/**
 - No `vercmp` binary on this host: no differential run against vercmp(8). The official vector table is the oracle.
 - The `alpm` crate comparison (libalpm bindings) was not run.
 - Stable rustup toolchain manifest is missing on this host. Builds use `RUSTUP_TOOLCHAIN=1.99.1-x86_64-unknown-linux-gnu`. Default toolchain was not changed.
-- Bun front end (step 3): see next.
+- Bun front end (step 3) done: `distro/alpm/bun` (`src/cli.ts`, `src/backends.ts`), no npm deps.
+   - pacman backend shells out to `yolo-pm --json search`. cargo backend runs `cargo search`.
+   - flatpak, uv and winget are reported unavailable: their binaries are not on PATH on this host. No adapter exists for them either.
+   - Tests: 9 pass (`bun test`). Receipts: bun-test.txt, bun-search-sudo-rs.txt.
+   - Runtime: the bun on PATH is v1.4.6-canary.1. `bun agent-plugin doctor` reports aphrody:true. The session-start hook warned otherwise. Not reconciled. No runtime was installed.
 
 ## Next
-- Step 3: Bun TypeScript front end in `distro/alpm/bun/`. Calls `yolo-pm --json`. Backends flatpak, cargo, uv, winget are reported unavailable unless found on PATH.
-- Step 4 receipts: cargo test and vercmp, timings, `info` and `deps` (done for step 2).
+- Step 4 receipts: cargo test and vercmp, timings, `info` and `deps` (written in docs/receipts/r2-alpm).
+- Optional: signature verification of `cachyos.db.sig` (time-boxed).
