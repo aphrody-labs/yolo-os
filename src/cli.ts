@@ -199,11 +199,20 @@ if (command === "alfs") {
     const configPath = `${target}/configuration`;
     if (!(await Bun.file(`${target}/jhalfs`).exists()) || !(await Bun.file(configPath).exists())) fail(`Expected jhalfs and configuration at ${target}`);
     const config = await Bun.file(configPath).text();
-    if (!/^RUNMAKE="n"\s*$/m.test(config)) fail(`Refusing jhalfs generation: ${configPath} must contain the exact setting RUNMAKE="n". Configure with jhalfs menuconfig and disable build execution first.`);
-    if (/^(?:GETPKG|CLEAN)="y"\s*$/m.test(config)) fail(`Refusing generation with GETPKG or CLEAN enabled in ${configPath}. Disable both so this command neither downloads packages nor cleans the target build directory.`);
-    if (!has("--execute")) { console.log(JSON.stringify({ planned: true, cwd: target, command: ["./jhalfs", "run"], runMake: "n", note: "This generates ALFS scripts and a Makefile; it does not run the package build." }, null, 2)); process.exit(0); }
+    for (const [index, line] of config.split(/\r?\n/).entries()) {
+      if (!line.trim() || line.trimStart().startsWith("#")) continue;
+      if (!/^[A-Za-z_][A-Za-z0-9_]*=(?:[yn]|-?\d+|"(?:[^"$`\\\r\n]|\$[A-Za-z_][A-Za-z0-9_]*)*"|'[^'\r\n]*')$/.test(line)) fail(`Refusing non-Kconfig shell syntax in ${configPath}:${index + 1}. Regenerate it with jhalfs menuconfig and use literal values.`);
+    }
+    for (const option of ["RUNMAKE", "GETPKG", "CLEAN"]) {
+      const settings = [...config.matchAll(new RegExp(`^(?:export\\s+)?${option}=(.*)$`, "gm"))].map((match) => match[1]!.trim());
+      const unexpected = settings.find((setting) => !["n", `"n"`, `'n'`].includes(setting));
+      if (unexpected !== undefined) fail(`Refusing jhalfs generation: ${option} must be unset or explicitly disabled in ${configPath}; found ${unexpected}.`);
+    }
+    if (!has("--execute")) { console.log(JSON.stringify({ planned: true, cwd: target, command: ["./jhalfs", "run"], runMake: "n (jhalfs default; enabled setting rejected)", note: "This generates ALFS scripts and a Makefile; it does not run the package build." }, null, 2)); process.exit(0); }
     if (process.platform !== "linux") fail("jhalfs generation requires a supported Linux host.");
-    const child = Bun.spawn(["bash", "./jhalfs", "run"], { cwd: target, stdin: "inherit", stdout: "inherit", stderr: "inherit", env: { ...process.env, RUNMAKE: "n" } });
+    const child = Bun.spawn(["bash", "./jhalfs", "run"], { cwd: target, stdin: "pipe", stdout: "inherit", stderr: "inherit", env: { ...process.env, RUNMAKE: "n" } });
+    child.stdin.write("yes\nyes\n");
+    child.stdin.end();
     process.exit(await child.exited);
   }
   fail(`Unknown alfs action: ${action ?? "<missing>"}`);

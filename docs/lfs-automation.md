@@ -22,8 +22,8 @@ Check its prerequisites and the generated scripts for the selected book version.
 3. `lfs-bun fetch --book <directory> --execute` retrieves missing files to the
    source cache and verifies the official MD5 list.
 4. Clone ALFS with `lfs-bun alfs setup --dir <path> --execute`, configure jhalfs
-   with `make menuconfig`, select the matching book revision and set
-   `RUNMAKE="n"`, `GETPKG="n"` and `CLEAN="n"`. Review the target mount and config, then use
+   with `make menuconfig`, select the matching book revision and leave
+   `RUNMAKE`, `GETPKG` and `CLEAN` disabled. Review the target mount and config, then use
    `lfs-bun alfs check --dir <path>` and
    `lfs-bun alfs generate --dir <path> --execute` to generate scripts and its
    Makefile without running the package build.

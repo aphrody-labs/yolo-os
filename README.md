@@ -37,7 +37,7 @@ requirements are authoritative. Downloading and building are separate steps.
 read-only. `fetch --execute` downloads the package sources and checks their
 official MD5 list. LFS construction runs on Linux. For full book
 automation, clone official ALFS/jhalfs with `alfs setup`, configure the exact
-book revision with `RUNMAKE="n"`, `GETPKG="n"` and `CLEAN="n"`, then generate
+book revision with `RUNMAKE`, `GETPKG` and `CLEAN` disabled, then generate
 scripts with `alfs generate`. Review target, mount and privilege assumptions,
 then run reviewed steps with `lfs-bun run`.
 
@@ -46,7 +46,7 @@ bun run lfs -- book sync --track stable-systemd
 bun run lfs -- plan --book ./artifacts/lfs-book/stable-systemd
 bun run lfs -- fetch --book ./artifacts/lfs-book/stable-systemd --execute
 bun run lfs -- alfs setup --dir ./work/jhalfs --execute
-# Configure the selected book and set RUNMAKE=n, GETPKG=n, CLEAN=n with make menuconfig.
+# Configure the selected book and leave RUNMAKE, GETPKG, CLEAN disabled in make menuconfig.
 bun run lfs -- alfs generate --dir ./work/jhalfs --execute
 bun run lfs -- run --script path/to/reviewed-generated-script.sh
 ```

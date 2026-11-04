@@ -71,7 +71,8 @@ need manual verification). `generate` requires an existing jhalfs checkout and
 configuration containing exactly `RUNMAKE="n"`; it rejects `GETPKG="y"` and
 `CLEAN="y"`. With `--execute` it runs the official generator on Linux and
 leaves its generated Makefile available for review without downloading sources
-or starting the LFS package build.
+or starting the LFS package build. Unset jhalfs options default to `n`; an
+enabled or nonstandard assignment for these three gates is rejected.
 
 ## `run --script FILE [--step-id ID] [--journal FILE] [--execute]`
 

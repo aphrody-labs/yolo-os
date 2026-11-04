@@ -12,6 +12,10 @@
 - [LFS package URL list](research/lfs-stable-systemd-2026-11-04/wget-list) and
   [matching checksum list](research/lfs-stable-systemd-2026-11-04/md5sums):
   original official inputs used to produce the manifest capture.
+- [ALFS generation check](research/alfs-generation-2026-11-04.md) and
+  [JSON record](research/alfs-generation-2026-11-04.json): jhalfs generated
+  LFS 13.1 systemd scripts/Makefile in an isolated Docker volume without
+  downloading packages or starting the build.
 - [LFS 13.1-systemd manifest capture](research/lfs-stable-systemd-2026-11-04.json):
   source URLs, observed counts and checksums for the official `wget-list` and
   `md5sums` files.

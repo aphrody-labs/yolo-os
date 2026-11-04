@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-04",
+  "environment": {
+    "container": "Debian 13 (trixie) under Docker Desktop / WSL2",
+    "jhalfsCommit": "a13fd9828b8c28d02dfde824a441cd7dd3a1643d",
+    "lfsBook": "13.1 systemd",
+    "lfsBookCommit": "2e45031d5a2c1fe9e77239667f70631580eebfc3"
+  },
+  "result": {
+    "status": "generated",
+    "makefileSha256": "7ea406cb7e220cae34f51f457cb562a62776bc37ec56986957c038e15e7b06d1",
+    "generatedDirectoryFilesIncludingBookCheckout": 538,
+    "packageStepScripts": 131,
+    "kernfsAndChrootHelperScripts": 3,
+    "sourceFilesDownloaded": 0,
+    "packageBuildStarted": false,
+    "hostPrerequisitesPassed": true,
+    "targetVolumeWasDisposable": true
+  },
+  "note": "The dated record preserves generation metadata only. The generated shell scripts and Makefile remain upstream-derived executable inputs and are not bundled into the research docs."
+}
