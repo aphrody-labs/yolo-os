@@ -24,11 +24,19 @@
   commit ID and response digest for kernel.org, LFS, Asterinas and uutils.
 - [Source registry](sources.md): canonical URLs, authority boundaries and
   metadata requirements for each source family.
-- [System design](architecture.md): crawler, evidence model, CLI and Cargo
-  launcher boundaries.
+- [System design](architecture.md): Rust crawler, evidence model and CLI
+  boundaries.
 - [LFS automation](lfs-automation.md): supported acquisition workflow, ALFS
   integration and execution controls.
 - [CLI reference](cli.md): commands, flags and output format.
+- [LFS Rust method](lfs-rust-method.md): where Rust belongs in an LFS
+  learning and build workflow.
+- [Bun OS LFS integration plan](bunos-lfs-integration-plan.md): Bun, Rust
+  userland, first-party PID 1 and patched-kernel phases.
+- [Linux and Asterinas boot profiles](boot-profiles.md): userspace PID 1,
+  initramfs requirements and separate evidence gates for each kernel target.
+- [Awesome Rust for LFS](awesome-rust-lfs.md): selected Rust crates and the
+  local derivative of the community Awesome Rust catalog.
 - [Decisions and limitations](decisions.md): rationale and known gaps.
 
 Research state in this initial documentation was checked on 2026-11-04. Crawl

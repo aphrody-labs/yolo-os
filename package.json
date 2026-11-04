@@ -1,21 +1,30 @@
 {
-  "name": "yolo-os-lfs",
+  "name": "@aphrody/yolo-os",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "description": "Bun orchestration and reproducible research tooling for Linux From Scratch and YOLO OS inputs",
+  "description": "Yolo OS command bridge to the yolo-bun package manager",
   "license": "MIT",
-  "workspaces": ["packages/web-crawler"],
-  "bin": { "lfs-bun": "./src/cli.ts" },
-  "scripts": {
-    "lfs": "bun run src/cli.ts",
-    "check": "bun check",
-    "fmt": "bun fmt"
+  "type": "module",
+  "engines": {
+    "bun": ">=1.4.4"
   },
-  "dependencies": {
-    "@yolo-web/web-crawler": "workspace:*"
+  "bin": {
+    "yolo-os": "src/yolo.ts"
+  },
+  "scripts": {
+    "yolo-os": "bun src/yolo.ts",
+    "workspace:check": "bun check --no-script",
+    "workspace:check:aot": "bun check --no-script --aot src/yolo.ts",
+    "workspace:lint": "bun lint --no-script src",
+    "workspace:fmt": "bun fmt --no-script src package.json tsconfig.json",
+    "workspace:fmt:check": "bun fmt --no-script --check src package.json tsconfig.json",
+    "workspace:build:bytecode": "bun build --compile --bytecode --outfile dist/bin/yolo-os src/yolo.ts",
+    "workspace:build:aot": "bun build --compile --aot --trim --outfile dist/bin/yolo-os src/yolo.ts",
+    "pid1:check": "bun check --no-script packages/bunos-init/src/init.ts",
+    "pid1:check:aot": "bun check --no-script --aot packages/bunos-init/src/init.ts",
+    "pid1:build-initramfs": "bash factory/linux/build-initramfs.sh"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.4"
+    "@types/bun": "1.4.4"
   }
 }

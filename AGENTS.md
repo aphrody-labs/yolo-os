@@ -11,4 +11,7 @@
   build execution as distinct operations.
 - Treat ALFS-generated commands and package checksums from the selected book as
   upstream-controlled inputs. Do not invent package versions or checksums.
-- `cargo-lfs-bun` is a launcher for the Bun CLI, not an independent LFS engine.
+- `yolo-bun` owns the `yolo pkg` workflow and deterministic package plans;
+  `yolo-os pkg` forwards to that executable. Each native backend owns dependency
+  resolution, signatures, installation, and rollback. `yolo-os` is not an
+  independent package resolver or LFS build engine.

@@ -1,77 +1,118 @@
 # YOLO OS / LFS
 
-Bun-first research and orchestration tools for Linux From Scratch (LFS), with a
-small Cargo subcommand launcher. The repository keeps upstream facts linked to
-their sources and stores crawler output with timestamps and SHA-256 digests.
+Rust research and orchestration tools for Linux From Scratch (LFS). The book
+remains the authority for package versions, build commands, host requirements,
+errata and security notices. This repository records sources and state so each
+step stays inspectable and reproducible.
 
-## Quick start
+## Build and run
 
-Install Bun and Rust, then install the workspace packages:
+Install Rust 1.85 or newer, then:
 
 ```sh
-bun install
-bun run lfs -- help
-cargo run -p cargo-lfs-bun -- --help
+cargo build --locked
+cargo run -p cargo-lfs -- --help
 ```
 
-To install the Cargo subcommand into Cargo's configured binary directory, run
-`cargo install --path crates/cargo-lfs-bun --locked`, then invoke
-`cargo lfs-bun --help`. Keep this checkout available to the launcher, or set
-`YOLO_OS_BUN` when Bun is not on `PATH`.
+Install the Cargo subcommand with `cargo install --path crates/cargo-lfs --locked`.
+It is then available as `cargo lfs --help`.
 
-Capture the current source set:
+`yolo-bun` owns the `yolo pkg` package workflow and native backend adapters.
+The `yolo-os` command forwards package operations to that CLI; install the
+`yolo` executable on `PATH` or set `YOLO_BUN_CLI` to its path:
 
 ```sh
-bun run lfs -- crawl --depth 1 --max-pages 60
+bun install --frozen-lockfile
+bun run yolo-os pkg backends
+bun run yolo-os pkg manage pacman upgrade
+bun run yolo-os pkg fdroid search adaway
+bun run yolo-os pkg fdroid install org.adaway --execute
+bun run yolo-os pkg image-plan path/to/resolved-profile.json
+bun run yolo-os pkg verify-image-plan plan.json artifact-files.json
+```
+
+The first-party Bun PID 1 prototype and test initramfs builder live here under
+`packages/bunos-init` and `factory/linux`. On a Linux build host with the
+listed `cpio`, `gzip`, `mknod` and Bun tools installed, use:
+
+```sh
+bun run pid1:check
+bun run pid1:build-initramfs -- ./dist/bunos-initramfs.cpio.gz
+```
+
+The initramfs is an experiment. It does not switch to an LFS root, launch the
+full service set, or carry a boot qualification. AOT is selected only when the
+chosen Bun exposes the AOT flags; the AOT checker currently requires the
+upstream canary lane.
+
+Capture current research sources:
+
+```sh
+cargo lfs crawl --depth 1 --max-pages 60
 ```
 
 The crawler respects `robots.txt`, stays within seed origins, limits response
-size and page count, and writes JSON evidence plus a linked Markdown extraction
-under `artifacts/`. Pass one or more URLs after `crawl` to override the seed list.
+size and page count, and writes JSON evidence plus linked Markdown under
+`artifacts/`. Pass URLs after `crawl` to override the seed list.
+
+F-Droid commands are forwarded to `yolo-bun` and then to an already installed
+`fdroidcl`/ADB setup. They manage apps on connected Android devices. Plans are
+printed by default; add `--execute` to run the native operation. The adapter
+does not install the F-Droid CLI or add signature verification; review
+`fdroidcl`'s repository trust model before executing.
 
 ## LFS workflow
 
-The current LFS book, its matching package versions, errata, advisories and host
-requirements are authoritative. Downloading and building are separate steps.
-`book sync` retrieves the official `wget-list` and `md5sums`; `plan` is
-read-only. `fetch --execute` downloads the package sources and checks their
-official MD5 list. LFS construction runs on Linux. For full book
-automation, clone official ALFS/jhalfs with `alfs setup`, configure the exact
-book revision with `RUNMAKE`, `GETPKG` and `CLEAN` disabled, then generate
-scripts with `alfs generate`. Review target, mount and privilege assumptions,
-then run reviewed steps with `lfs-bun run`.
+Downloading, planning, generation and execution are separate steps. The official
+book supplies package sources and checksums; official ALFS/jhalfs extracts the
+book's structured instructions. Rust handles research, provenance and
+orchestration. Package build recipes remain the commands specified by upstream
+LFS and each package.
 
 ```sh
-bun run lfs -- book sync --track stable-systemd
-bun run lfs -- plan --book ./artifacts/lfs-book/stable-systemd
-bun run lfs -- fetch --book ./artifacts/lfs-book/stable-systemd --execute
-bun run lfs -- alfs setup --dir ./work/jhalfs --execute
-# Configure the selected book and leave RUNMAKE, GETPKG, CLEAN disabled in make menuconfig.
-bun run lfs -- alfs generate --dir ./work/jhalfs --execute
-bun run lfs -- run --script path/to/reviewed-generated-script.sh
+cargo lfs book sync --track stable-systemd
+cargo lfs plan --book ./artifacts/lfs-book/stable-systemd
+cargo lfs fetch --book ./artifacts/lfs-book/stable-systemd --execute
+cargo lfs alfs setup --dir ./work/jhalfs --execute
+# Configure the selected book and leave RUNMAKE, GETPKG, CLEAN disabled.
+cargo lfs alfs generate --dir ./work/jhalfs --execute
+cargo lfs run --script path/to/reviewed-generated-script.sh
 ```
 
 `run` prints a plan unless `--execute` is given and journals script digests,
-timestamps and exit status for step-level continuation. LFS instructions can
-format partitions and install a bootable operating system; use a disposable Linux VM
-and a dedicated virtual disk. The tool does not select or format a disk.
+timestamps and exit status for step-level continuation. Use a disposable Linux
+VM and a dedicated virtual disk: LFS instructions can format partitions and
+install a bootable system. This tool does not select or format a disk.
+
+## LFS principles in this project
+
+- Follow one selected book revision from preparation through the final system.
+- Preserve upstream commands and expose their inputs, outputs and provenance.
+- Make state changes visible, resumable and reviewable one step at a time.
+- Keep the resulting system minimal; LFS is a starting point for learning and
+  building a system, not a preconfigured general-purpose distribution.
+- Use Rust for the tools around the build, without disguising package recipes
+  behind a second, unverified build engine.
 
 ## Project map
 
-- [`docs/`](docs/README.md): research, source map, architecture, CLI operations,
-  automation boundaries and decisions.
-- [`src/cli.ts`](src/cli.ts): Bun CLI, source retrieval, manifest checks and
-  explicit execution gate.
-- [`crates/cargo-lfs-bun/`](crates/cargo-lfs-bun/Cargo.toml): Cargo-compatible
-  launcher (`cargo lfs-bun`).
-- [`sources.json`](sources.json): requested research seeds and companion Git remotes.
-- [`packages/web-crawler/`](packages/web-crawler/): workspace crawler adapter
-  used by the CLI, with raw evidence capture and bounded crawling.
+- [`crates/cargo-lfs/src/main.rs`](crates/cargo-lfs/src/main.rs): Rust CLI,
+  crawling, source retrieval, manifest checks and execution journal.
+- [`src/yolo.ts`](src/yolo.ts): Bun `yolo-os pkg` command bridge to the
+  `yolo-bun` package CLI; it does not implement a second resolver or installer.
+- [`docs/bun-package-orchestration.md`](docs/bun-package-orchestration.md):
+  backend ownership and package-plan contract.
+- [`docs/`](docs/README.md): source research, architecture, CLI and LFS method.
+- [`docs/awesome-rust-lfs.md`](docs/awesome-rust-lfs.md): selected Rust
+  references and the `aphrody-dev/awesome-rust` LFS curation branch.
+- [`docs/bunos-lfs-integration-plan.md`](docs/bunos-lfs-integration-plan.md):
+  source-built LFS path into Bun OS with Bun PID 1, uutils and sudo-rs.
+- [`sources.json`](sources.json): research seeds and companion Git remotes.
+- `artifacts/`: generated, ignored evidence and package cache.
 
-## Scope and platform
+## Platform and scope
 
-The repository automates acquisition and orchestration; it does not replace the
-LFS book, verify that a host meets every LFS requirement, or claim that a build
-succeeded. Current LFS builds require Linux and the exact instructions for the
-selected book revision. Windows can run the research CLI but cannot execute LFS
-build scripts.
+Research and planning can run on Windows. Package acquisition with the selected
+checksum verifier and build execution are intended for Linux. The CLI does not
+replace the LFS book, validate every host requirement, or claim that a build
+succeeded. Run LFS within Linux or a VM with its own dedicated target disk.
