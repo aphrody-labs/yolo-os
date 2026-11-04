@@ -1,0 +1,10 @@
+[package]
+name = "cargo-lfs-bun"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Cargo subcommand launcher for the YOLO OS LFS Bun CLI"
+
+[[bin]]
+name = "cargo-lfs-bun"
+path = "src/main.rs"

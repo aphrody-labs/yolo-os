@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "description": "Owner-provided research URLs plus companion upstream Git remotes for source revision evidence. Captures record retrieval time and hashes separately.",
+  "sources": [
+    { "name": "Asterinas repositories", "url": "https://github.com/orgs/asterinas/repositories?q=sort%3Astars", "kind": "github-org" },
+    { "name": "uutils repositories", "url": "https://github.com/orgs/uutils/repositories?q=sort%3Astars", "kind": "github-org" },
+    { "name": "Linux From Scratch", "url": "https://www.linuxfromscratch.org/", "kind": "project" },
+    { "name": "LF Engineering repositories", "url": "https://github.com/orgs/LF-Engineering/repositories?q=sort%3Astars", "kind": "github-org" },
+    { "name": "Linux Foundation", "url": "https://www.linuxfoundation.org/", "kind": "foundation" },
+    { "name": "kernel.org", "url": "https://www.kernel.org/", "kind": "kernel-release-index" },
+    { "name": "Linux mainline Git", "url": "https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git", "kind": "git" },
+    { "name": "LFS book Git", "url": "https://git.linuxfromscratch.org/lfs.git", "kind": "git" },
+    { "name": "Asterinas kernel Git", "url": "https://github.com/asterinas/asterinas.git", "kind": "git" },
+    { "name": "uutils coreutils Git", "url": "https://github.com/uutils/coreutils.git", "kind": "git" },
+    { "name": "Linus Torvalds repositories", "url": "https://github.com/torvalds?tab=repositories&q=&type=&language=&sort=stargazers", "kind": "github-user" },
+    { "name": "GNU documentation", "url": "https://www.gnu.org/doc/doc.html", "kind": "documentation-index" },
+    { "name": "GNU software", "url": "https://www.gnu.org/software/software.html", "kind": "software-index" }
+  ]
+}

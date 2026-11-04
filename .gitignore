@@ -1,0 +1,9 @@
+node_modules/
+target/
+work/
+artifacts/
+artifacts/crawl-*.json
+artifacts/crawl-*.md
+artifacts/lfs-sources/
+artifacts/lfs-build/
+*.log

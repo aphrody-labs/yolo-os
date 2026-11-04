@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "project": "Linux From Scratch",
+  "book": "13.1-systemd",
+  "track": "stable-systemd",
+  "retrievedAt": "2026-11-04T18:23:27.681Z",
+  "manifestCounts": {
+    "packageUrlsInWgetList": 99,
+    "entriesInMd5sums": 94
+  },
+  "files": {
+    "wget-list": {
+      "url": "https://www.linuxfromscratch.org/lfs/downloads/stable-systemd/wget-list",
+      "bytes": 6485,
+      "sha256": "ecf3cf54a5c9b521a1f9e6cfba78f3d548256dd827afe860541ae76acd0432d7"
+    },
+    "md5sums": {
+      "url": "https://www.linuxfromscratch.org/lfs/downloads/stable-systemd/md5sums",
+      "bytes": 5160,
+      "sha256": "ccb1b1db30e62d2f63e2f76fd9490e5280c2a4c735e25794a6228400f171264f"
+    }
+  },
+  "note": "Manifest counts and hashes describe retrieved files. No package archives were downloaded or built for this snapshot."
+}

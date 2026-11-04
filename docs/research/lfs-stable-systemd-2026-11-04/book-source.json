@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "project": "Linux From Scratch",
+  "track": "stable-systemd",
+  "retrievedAt": "2026-11-04T18:41:24.505Z",
+  "files": {
+    "wget-list": {
+      "url": "https://www.linuxfromscratch.org/lfs/downloads/stable-systemd/wget-list",
+      "bytes": 6485,
+      "sha256": "ecf3cf54a5c9b521a1f9e6cfba78f3d548256dd827afe860541ae76acd0432d7"
+    },
+    "md5sums": {
+      "url": "https://www.linuxfromscratch.org/lfs/downloads/stable-systemd/md5sums",
+      "bytes": 5160,
+      "sha256": "ccb1b1db30e62d2f63e2f76fd9490e5280c2a4c735e25794a6228400f171264f"
+    }
+  }
+}

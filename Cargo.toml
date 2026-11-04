@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = ["crates/cargo-lfs-bun"]
+default-members = ["crates/cargo-lfs-bun"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"

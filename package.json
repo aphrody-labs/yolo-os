@@ -1,0 +1,21 @@
+{
+  "name": "yolo-os-lfs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Bun orchestration and reproducible research tooling for Linux From Scratch and YOLO OS inputs",
+  "license": "MIT",
+  "workspaces": ["packages/web-crawler"],
+  "bin": { "lfs-bun": "./src/cli.ts" },
+  "scripts": {
+    "lfs": "bun run src/cli.ts",
+    "check": "bun check",
+    "fmt": "bun fmt"
+  },
+  "dependencies": {
+    "@yolo-web/web-crawler": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4"
+  }
+}
