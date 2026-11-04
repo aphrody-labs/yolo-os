@@ -1,0 +1,26 @@
+[
+  {
+    "bytes": 131681,
+    "db_sig_status": "404",
+    "fetch_ms": 60.757369999999995,
+    "repo": "core",
+    "sha256": "92ecace004f4dd664ec6c2b151f796158ea0bc2c734934ce93171b1162ac1c38",
+    "url": "https://geo.mirror.pkgbuild.com/core/os/x86_64/core.db"
+  },
+  {
+    "bytes": 9005983,
+    "db_sig_status": "404",
+    "fetch_ms": 107.281889,
+    "repo": "extra",
+    "sha256": "030f7bd3f0e1ecf081edc2108ef7c67c99687690293431203ace4afe3d23f207",
+    "url": "https://geo.mirror.pkgbuild.com/extra/os/x86_64/extra.db"
+  },
+  {
+    "bytes": 523100,
+    "db_sig_status": "200",
+    "fetch_ms": 164.801663,
+    "repo": "cachyos",
+    "sha256": "94342c28947a915a8d0cf909b6708e732f4c935d412c88975b89dd94e39fcdbd",
+    "url": "https://mirror.cachyos.org/repo/x86_64/cachyos/cachyos.db"
+  }
+]

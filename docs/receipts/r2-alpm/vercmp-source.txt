@@ -1,0 +1,3 @@
+# source: pacman sync-db vercmp vectors = test/util/vercmptest.sh @663941f (CachyOS/pacman, read via gh api)
+# version.c @663941f: rpmvercmp loop is 'while (*one && *two)' + final showdown
+# vercmp binary not installed on this host; no differential run against vercmp(8)

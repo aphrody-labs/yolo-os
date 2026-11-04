@@ -1,0 +1,12 @@
+[package]
+name = "yolo-alpm"
+description = "Pure-Rust, read-only reader for pacman sync databases (no libalpm, no unsafe)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+flate2 = "1"
+ruzstd = "0.9"
+tar = "0.4"

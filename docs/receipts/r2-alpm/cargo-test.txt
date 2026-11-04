@@ -1,0 +1,23 @@
+# captured 2026-11-04T23:54:47Z
+# rustc: rustc 1.99.1 (58cf8f9c3 2026-10-13)
+# cargo: cargo 1.99.1 (5f94df478 2026-08-27)
+# RUSTUP_TOOLCHAIN=1.99.1-x86_64-unknown-linux-gnu (stable toolchain manifest missing on this host)
+running 17 tests
+test deps::tests::earlier_repo_wins_for_equal_candidates ... ok
+test deps::tests::closure_is_provides_aware_and_cycle_safe ... ok
+test deps::tests::relation_parsing ... ok
+test deps::tests::missing_root_is_none ... ok
+test deps::tests::unversioned_provision_does_not_satisfy_versioned_constraint ... ok
+test desc::tests::files_list_is_root_relative ... ok
+test desc::tests::non_numeric_size_is_an_error ... ok
+test desc::tests::missing_name_is_an_error ... ok
+test desc::tests::parses_typed_fields_and_counts_unknown_keys ... ok
+test vercmp::tests::leading_zeros_and_long_numbers ... ok
+test vercmp::tests::official_pacman_vectors ... ok
+test vercmp::tests::official_vectors_mirror_with_flipped_sign ... ok
+test deps::tests::versioned_constraint_filters_candidates ... ok
+test vercmp::tests::vercmp_man_page_chain_is_ascending ... ok
+test vercmp::tests::real_package_versions ... ok
+test vercmp::tests::vercmp_man_page_examples ... ok
+test vercmp::tests::release_only_compared_when_both_present ... ok
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

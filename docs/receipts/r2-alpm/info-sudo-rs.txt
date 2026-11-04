@@ -1,0 +1,19 @@
+Repository   : extra
+Name         : sudo-rs
+Version      : 0.2.15-1
+Architecture : x86_64
+Description  : A memory-safe implementation of sudo and su
+URL          : https://github.com/trifectatechfoundation/sudo-rs
+Licenses     : Apache-2.0 AND MIT
+Groups       : 
+Download size: 569375 bytes
+Installed    : 2107294 bytes
+Build date   : 1788171929
+Packager     : Bert Peters <bertptrs@archlinux.org>
+SHA-256      : e5482398e1514eb18318ef8eb1716c102d233228643b1dd3870d7c676989f8fd
+PGP sig      : present (not verified)
+Provides     : 
+Depends On   : glibc  libgcc  pam
+Optional     : sudo: default configuration files  apparmor: apparmor support
+Conflicts    : 
+Replaces     : 
