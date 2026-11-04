@@ -20,6 +20,7 @@ Fetched with curl into ~/src/yolo-work/prod-alpm-dbs/, not /var/lib/pacman.
 The packages column is the count of */desc entries in the archive. The core and extra databases are gzip, omarchy is zstd, and the cachyos compression was not checked. The cachyos count came from plain `tar -tf`.
 
 ## Blockers
+- Push to claude/prod-alpm is rejected because ref refs/heads/claude exists (git ref namespace clash). Pushed to claude-prod-alpm instead, matching peers such as claude-bunos-arch.
 - Steps 3 and 4: origin/claude/alpm does not exist yet (git fetch at 22:39:15Z). No mismatches to report.
 - Bus: no .coordkit-bus/ in the checkout, so there is no inbox/alpm/ to write to.
 
