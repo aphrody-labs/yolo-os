@@ -21,7 +21,8 @@ timeout and a 2 MB response limit. Its JSON records include final URL, status,
 retrieval timestamp, content type, extracted links and response SHA-256. The
 digest describes retrieved bytes; it is not a publisher signature. The current
 extractor is HTML/text oriented and does not render JavaScript or enumerate
-paginated APIs. Check upstream licensing before redistributing captured text.
+paginated APIs. Set `includeBody: true` to preserve raw HTML in a capture.
+Check upstream licensing before redistributing captured text.
 
 The package also exports `listGitHubRepositories(owner, options)` for public
 organization/user repository metadata and `inspectGitRemote(url)` for

@@ -6,8 +6,9 @@
   and [JSON evidence](research/github-repository-rankings-2026-11-04.json): all
   public repositories returned for the requested orgs/user, sorted by stars.
 - [Web source captures](research/web-source-captures-2026-11-04.md) and
-  [JSON evidence](research/web-source-captures-2026-11-04.json): 60 fetched
-  pages with raw response bodies, timestamps and SHA-256 digests.
+  [JSON evidence](research/web-source-captures-2026-11-04.json): 60 crawl
+  attempts, 59 raw response bodies, and one recorded out-of-origin redirect
+  block, with timestamps and SHA-256 digests.
 - [LFS package URL list](research/lfs-stable-systemd-2026-11-04/wget-list) and
   [matching checksum list](research/lfs-stable-systemd-2026-11-04/md5sums):
   original official inputs used to produce the manifest capture.

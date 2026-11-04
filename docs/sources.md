@@ -18,9 +18,9 @@ identifies where to collect data and which source is authoritative for a claim.
 
 GitHub org/user listings are collected with the official REST endpoints at 100
 records per page, then sorted locally by star count. Collection reads five
-pages per owner by default (configurable, hard cap 10). The saved snapshot reports page count and whether
-the configured page cap truncated the listing; each API page records retrieval
-time, ETag, item count and SHA-256. A truncated ranking may omit
+pages per owner by default (configurable, hard cap 10). The saved snapshot
+reports page count and whether the configured page cap truncated the listing;
+each API page records retrieval time, ETag, item count and SHA-256. A truncated ranking may omit
 repositories from later pages. A GitHub token can be supplied as
 `GITHUB_TOKEN` to use the higher authenticated API quota.
 

@@ -25,10 +25,10 @@ bounded crawler and defaults of depth 1, 50 pages and 700 ms spacing.
 ## `repos [--max-pages N] [--output FILE]`
 
 Collects all GitHub org/user sources from `sources.json` through the REST API,
-then sorts the fetched records by stars. The default is five pages of 100 records per owner; the dated
-JSON preserves raw API page bodies and a Markdown ranking report is saved. Set `GITHUB_TOKEN` to use an
-authenticated API quota. Metadata marks listings as truncated if the page cap
-is reached.
+then sorts the fetched records by stars. The default is five pages of 100
+records per owner; the dated JSON preserves raw API page bodies and a Markdown
+ranking report is saved. Set `GITHUB_TOKEN` to use an authenticated API quota.
+Metadata marks listings as truncated if the page cap is reached.
 
 ## `git-heads [--output FILE]`
 
