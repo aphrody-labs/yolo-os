@@ -5,6 +5,9 @@
   "description": "Yolo OS command bridge to the yolo-bun package manager",
   "license": "MIT",
   "type": "module",
+  "workspaces": [
+    "packages/windows-winrt"
+  ],
   "engines": {
     "bun": ">=1.4.4"
   },
@@ -19,10 +22,13 @@
     "workspace:fmt": "bun fmt --no-script src package.json tsconfig.json",
     "workspace:fmt:check": "bun fmt --no-script --check src package.json tsconfig.json",
     "workspace:build:bytecode": "bun build --compile --bytecode --outfile dist/bin/yolo-os src/yolo.ts",
-    "workspace:build:aot": "bun build --compile --aot --trim --outfile dist/bin/yolo-os src/yolo.ts",
+    "workspace:build:aot": "bun build --compile --aot --outfile dist/bin/yolo-os src/yolo.ts",
     "pid1:check": "bun check --no-script packages/bunos-init/src/init.ts",
     "pid1:check:aot": "bun check --no-script --aot packages/bunos-init/src/init.ts",
-    "pid1:build-initramfs": "bash factory/linux/build-initramfs.sh"
+    "pid1:build-initramfs": "bash factory/linux/build-initramfs.sh",
+    "windows:winrt:check": "bun check --no-script --project packages/windows-winrt/tsconfig.json",
+    "windows:winrt:test": "bun test packages/windows-winrt/test",
+    "windows:winrt:build:napi": "bun run --cwd packages/windows-winrt build:napi"
   },
   "devDependencies": {
     "@types/bun": "1.4.4"

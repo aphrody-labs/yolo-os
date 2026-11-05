@@ -1,0 +1,31 @@
+{
+  "name": "@yolo-rs/windows-winrt",
+  "version": "1.4.7",
+  "private": true,
+  "description": "Optional Bun provider for Windows Runtime APIs, backed by windows-rs and Node-API.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "os": [
+    "win32"
+  ],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./winrt": "./src/winrt.ts",
+    "./provider": "./src/provider.ts"
+  },
+  "scripts": {
+    "build:napi": "bun src/provider.ts build",
+    "test": "bun test",
+    "typecheck": "bun check --no-script --project tsconfig.json"
+  },
+  "engines": {
+    "bun": ">=1.4.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yolo-rs/yolo-os.git",
+    "directory": "packages/windows-winrt"
+  }
+}

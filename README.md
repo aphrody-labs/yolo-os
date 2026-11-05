@@ -17,6 +17,11 @@ cargo run -p cargo-lfs -- --help
 Install the Cargo subcommand with `cargo install --path crates/cargo-lfs --locked`.
 It is then available as `cargo lfs --help`.
 
+The Cargo workspace also contains `crates/bun-os-native`, a host-only library
+for CPU/memory topology, optional CUDA driver discovery, and monotonic clock
+probes. It is OS inventory for yolo-os, not a cross-compilation dependency;
+CUDA support is dynamically loaded and optional.
+
 `yolo-bun` owns the `yolo pkg` package workflow and native backend adapters.
 The `yolo-os` command forwards package operations to that CLI; install the
 `yolo` executable on `PATH` or set `YOLO_BUN_CLI` to its path:
