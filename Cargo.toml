@@ -5,3 +5,10 @@ default-members = ["crates/cargo-lfs", "crates/bun-os-native", "crates/windows-n
 
 [workspace.package]
 license = "MIT"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+opt-level = 3
+strip = "symbols"
