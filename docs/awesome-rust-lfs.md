@@ -3,7 +3,7 @@
 The upstream [`rust-unofficial/awesome-rust`](https://github.com/rust-unofficial/awesome-rust)
 repository is a community-maintained, unofficial curated list. It is not an
 official Rust project or Rust Foundation catalog. The LFS adaptation is on the
-public fork [`aphrody-dev/awesome-rust`](https://github.com/aphrody-dev/awesome-rust),
+public fork [`yolo-rs/awesome-rust`](https://github.com/yolo-rs/awesome-rust),
 branch `yolo-lfs-2026`. It adds `YOLO-LFS.md` and a README link while leaving
 the upstream catalog entries intact. The working clone is at
 `work/awesome-rust-lfs` and records the upstream base commit in Git history.

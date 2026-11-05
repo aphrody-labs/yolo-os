@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
-members = ["crates/cargo-lfs"]
-default-members = ["crates/cargo-lfs"]
+members = ["crates/cargo-lfs", "crates/bun-os-native", "crates/windows-native-napi"]
+default-members = ["crates/cargo-lfs", "crates/bun-os-native", "crates/windows-native-napi"]
 
 [workspace.package]
 license = "MIT"

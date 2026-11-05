@@ -15,6 +15,9 @@ Git HTTPS remotes ──> `git ls-remote` ref/commit snapshot
 
 ## Components
 
+- `bun-os-native` provides host CPU/memory topology, optional CUDA driver
+  discovery, and monotonic clock probes. The API describes the current host;
+  it does not infer a cross-compilation target or qualify a GPU runtime.
 - `cargo-lfs` is a Rust CLI for source crawling, repository metadata, Git
   snapshots, LFS manifests, checksums, ALFS orchestration and step journaling.
 - The crawler is sequential and bounded. It enforces HTTP(S), rejects common

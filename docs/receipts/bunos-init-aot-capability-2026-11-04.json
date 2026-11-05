@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "dateUtc": "2026-11-04",
+  "scope": "PID 1 Bun AOT static analysis and trim-capability qualification only. No executable or initramfs was built in this receipt.",
+  "builder": {
+    "repository": "C:/src/yolo-bun",
+    "path": "vendor/bun-e57d89ba63a7-msvc1444/build/release/bun.exe",
+    "revision": "1.4.4-canary.1+e57d89ba6",
+    "sha256": "B306CA4529237A83BEA74AFA10BD9109C968DB1797B2E5E7E834B3D6108C1CBA"
+  },
+  "checks": {
+    "aotStaticAnalysis": {
+      "command": "bun check --aot packages/bunos-init/src/init.ts",
+      "exitCode": 0,
+      "output": "No type errors in 1 file"
+    },
+    "trimCapability": {
+      "command": "bun build --compile --aot --trim",
+      "result": "unsupported",
+      "error": "NoTrimTable",
+      "evidence": "C:/src/yolo-bun/docs/receipts/windows-yolo-package-manage-aot-2026-11-04.json"
+    }
+  },
+  "limitations": [
+    "AOT static analysis does not build or run the PID 1 executable.",
+    "The verified builder is a Windows x64 host binary; it does not qualify a Linux initramfs target build.",
+    "No initramfs, kernel, rootfs, or boot image was modified or produced."
+  ]
+}

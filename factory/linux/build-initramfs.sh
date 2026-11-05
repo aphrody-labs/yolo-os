@@ -17,11 +17,12 @@ chmod 0755 "$tmp" "$tmp/dev" "$tmp/proc" "$tmp/sys" "$tmp/run" "$tmp/tmp"
 mknod -m 0600 "$tmp/dev/console" c 5 1
 build_args=(build --compile)
 if bun build --help 2>&1 | grep -q -- '--aot'; then
-  build_args+=(--aot --trim)
+  build_args+=(--aot)
   printf 'Using Bun AOT compilation for the PID 1 entry.\n'
 else
   printf 'This Bun build has no AOT compiler; using upstream standalone compilation. Use the pinned canary lane for AOT.\n' >&2
 fi
+printf 'Skipping executable trimming: the pinned Bun builder has no trim table (NoTrimTable).\n'
 bun "${build_args[@]}" "$entry" --outfile "$tmp/init"
 chmod 0755 "$tmp/init"
 (
