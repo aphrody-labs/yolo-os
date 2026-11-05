@@ -7,3 +7,4 @@ artifacts/crawl-*.md
 artifacts/lfs-sources/
 artifacts/lfs-build/
 *.log
+dist/
