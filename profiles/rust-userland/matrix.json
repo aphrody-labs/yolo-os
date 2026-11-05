@@ -1,0 +1,25 @@
+{
+  "status": "draft: versions, Arch/nixpkgs package names and maturity are NOT verified; no conformance run performed",
+  "checked_utc": "2026-11-04T22:35Z",
+  "tools": [
+    {"gnu_tool": "coreutils", "rust_replacement": "uutils coreutils", "upstream": "https://github.com/uutils/coreutils", "license": "MIT", "version": "unverified", "arch_package": "unverified", "nixpkgs_package": "unverified", "maturity": "not measured", "conformance": "not run"},
+    {"gnu_tool": "findutils", "rust_replacement": "uutils findutils", "upstream": "https://github.com/uutils/findutils", "license": "MIT", "version": "unverified", "arch_package": "unverified", "nixpkgs_package": "unverified", "maturity": "not measured", "conformance": "not run"},
+    {"gnu_tool": "diffutils", "rust_replacement": "none verified", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "gap", "conformance": "not run"},
+    {"gnu_tool": "procps", "rust_replacement": "none verified", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "gap", "conformance": "not run"},
+    {"gnu_tool": "util-linux", "rust_replacement": "none verified", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "gap", "conformance": "not run"},
+    {"gnu_tool": "sed", "rust_replacement": "none verified", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "gap", "conformance": "not run"},
+    {"gnu_tool": "grep", "rust_replacement": "ripgrep (not drop-in; different CLI)", "upstream": "https://github.com/BurntSushi/ripgrep", "license": "MIT OR Unlicense", "version": "unverified", "arch_package": "unverified", "nixpkgs_package": "unverified", "maturity": "not drop-in", "conformance": "not run"},
+    {"gnu_tool": "awk", "rust_replacement": "none verified", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "gap", "conformance": "not run"},
+    {"gnu_tool": "tar", "rust_replacement": "none verified", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "gap", "conformance": "not run"},
+    {"gnu_tool": "gzip", "rust_replacement": "none verified", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "gap", "conformance": "not run"},
+    {"gnu_tool": "shadow", "rust_replacement": "none verified", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "keep GNU/C", "conformance": "not run"},
+    {"gnu_tool": "sudo", "rust_replacement": "sudo-rs", "upstream": "https://github.com/trifecta-tech/sudo-rs", "license": "Apache-2.0 OR MIT", "version": "unverified", "arch_package": "unverified", "nixpkgs_package": "unverified", "maturity": "not measured", "conformance": "not run"},
+    {"gnu_tool": "su", "rust_replacement": "none verified (sudo-rs ships su in some builds)", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "gap", "conformance": "not run"},
+    {"gnu_tool": "ntp", "rust_replacement": "none; chrony is C", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "keep C", "conformance": "not run"},
+    {"gnu_tool": "shell (bash)", "rust_replacement": "none POSIX-compatible verified", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "gap", "conformance": "not run"},
+    {"gnu_tool": "make", "rust_replacement": "none verified", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "gap", "conformance": "not run"},
+    {"gnu_tool": "binutils", "rust_replacement": "none verified (partial LLVM tooling is C++)", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "gap", "conformance": "not run"},
+    {"gnu_tool": "glibc", "rust_replacement": "none; C library stays C", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "keep C", "conformance": "not run"},
+    {"gnu_tool": "gcc", "rust_replacement": "none; compiler stays C/C++", "upstream": "", "license": "", "version": "", "arch_package": "", "nixpkgs_package": "", "maturity": "keep C/C++", "conformance": "not run"}
+  ]
+}
