@@ -1,0 +1,289 @@
+@import 'tailwindcss';
+
+/* Bun OS design system: the shape, type, motion and state scales (packages/m3-tokens), the
+   baseline colour roles and the single M3 -> Tailwind v4 mapping (packages/m3-theme). The fonts
+   (packages/m3-fonts) are imported from the entry modules so the bundler resolves their files.
+   The ThemeProvider replaces the colour roles at run time with the scheme the engine derives
+   from the selected seed (src/themes). */
+@import '@aphrody/m3-tokens/m3-tokens.css';
+@import '@aphrody/m3-theme/tokens.css';
+@import '@aphrody/m3-theme/tailwind.css';
+
+@theme {
+  --font-mono: var(--md-ref-typeface-code);
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--md-sys-color-outline-variant);
+  }
+}
+
+:root {
+  font-family: var(--md-ref-typeface-plain);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  position: relative;
+  overflow: hidden;
+}
+
+#root {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Popup windows opt out of the application shell's background. */
+body.popup-window-transparent-surface,
+body.popup-window-transparent-surface #popup-root {
+  background: transparent !important;
+}
+
+body.popup-window-transparent-surface #popup-root {
+  min-height: 100%;
+}
+
+/* Monospace utility class */
+.font-mono {
+  font-family: var(--md-ref-typeface-code);
+}
+
+/* State layer (M3): the content colour over the container at the hover, focus and pressed
+   opacities, for filled controls whose container is a role. */
+@utility state-layer {
+  position: relative;
+  isolation: isolate;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  }
+
+  &:hover:not(:disabled)::after {
+    opacity: var(--md-sys-state-hover-state-layer-opacity);
+  }
+
+  &:focus-visible::after {
+    opacity: var(--md-sys-state-focus-state-layer-opacity);
+  }
+
+  &:active:not(:disabled)::after {
+    opacity: var(--md-sys-state-pressed-state-layer-opacity);
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-slide-in {
+  animation: fadeSlideIn var(--md-sys-motion-duration-long2) var(--md-sys-motion-easing-emphasized-decelerate) forwards;
+  opacity: 0;
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard-decelerate) forwards;
+}
+
+/* Stagger delays */
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 200ms; }
+.stagger-5 { animation-delay: 250ms; }
+.stagger-6 { animation-delay: 300ms; }
+
+/* Distribution card: a surface container that rises one elevation level on hover. */
+.module-card {
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  transition:
+    box-shadow var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard),
+    border-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard),
+    background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  position: relative;
+}
+
+.module-card:hover {
+  background: var(--md-sys-color-surface-container);
+  border-color: var(--md-sys-color-outline);
+  box-shadow: var(--md-sys-elevation-level2);
+}
+
+/* Status indicator with pulsing ring */
+.status-indicator {
+  position: relative;
+}
+
+.status-indicator.running::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: pulseRing 2s var(--md-sys-motion-easing-standard-decelerate) infinite;
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--md-sys-color-surface-container-low);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--md-sys-color-outline-variant);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--md-sys-color-outline);
+}
+
+/* Buttons: the M3 state layer. */
+.btn-cyber {
+  position: relative;
+  overflow: hidden;
+  transition:
+    background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard),
+    border-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+}
+
+.btn-cyber::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+}
+
+.btn-cyber:hover:not(:disabled)::before {
+  opacity: var(--md-sys-state-hover-state-layer-opacity);
+}
+
+.btn-cyber:active:not(:disabled)::before {
+  opacity: var(--md-sys-state-pressed-state-layer-opacity);
+}
+
+/* Data display styling */
+.data-label {
+  font-family: var(--md-ref-typeface-code);
+  font-size: var(--md-sys-typescale-label-small-size);
+  line-height: var(--md-sys-typescale-label-small-line-height);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.data-value {
+  font-family: var(--md-ref-typeface-code);
+  font-weight: 500;
+}
+
+/* Spinner/loader */
+.spinner {
+  border: 2px solid var(--md-sys-color-outline-variant);
+  border-top-color: var(--md-sys-color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Reduced motion support - respects user's system preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus ring: 2px secondary outline at a 2px offset, drawn in addition to the focus state layer. */
+:focus-visible {
+  outline: 2px solid var(--md-sys-color-secondary);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Screen reader only utility class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

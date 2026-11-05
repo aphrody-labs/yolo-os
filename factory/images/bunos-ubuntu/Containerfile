@@ -1,0 +1,78 @@
+# syntax=docker/dockerfile:1.7
+# SPDX-License-Identifier: MIT
+# bunos-ubuntu: Ubuntu 26.10 base (pinned ubuntu-base tarball) + GNOME + COSMIC + Bun.
+# Targets: desktop (container), bootable (adds mainline 7.3 kernel, exported as rootfs tar).
+ARG UBUNTU_VERSION
+ARG UBUNTU_BASE_SHA256
+
+FROM alpine:3.24 AS fetch
+ARG UBUNTU_VERSION
+ARG UBUNTU_BASE_SHA256
+ADD --checksum=sha256:${UBUNTU_BASE_SHA256} https://cdimage.ubuntu.com/ubuntu-base/releases/${UBUNTU_VERSION}/release/ubuntu-base-${UBUNTU_VERSION}-base-amd64.tar.gz /base.tar.gz
+RUN mkdir /rootfs && tar -xzf /base.tar.gz -C /rootfs
+
+FROM scratch AS base
+COPY --from=fetch /rootfs/ /
+ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8
+# Runtime image: no docs, man pages or translations (copyright notices stay); no apt archive cache.
+RUN printf '%s\n' 'path-exclude=/usr/share/doc/*' 'path-include=/usr/share/doc/*/copyright' 'path-exclude=/usr/share/man/*' \
+       'path-exclude=/usr/share/info/*' 'path-exclude=/usr/share/gtk-doc/*' 'path-exclude=/usr/share/help/*' \
+       'path-exclude=/usr/share/locale/*' 'path-include=/usr/share/locale/locale.alias' 'path-include=/usr/share/locale/en*' \
+       'path-exclude=/usr/share/lintian/*' >/etc/dpkg/dpkg.cfg.d/01-bun-os-nodoc \
+  && printf 'Acquire::Languages "none";\nAPT::Keep-Downloaded-Packages "false";\n' >/etc/apt/apt.conf.d/01-bun-os \
+  && apt-get update && apt-get install -y --no-install-recommends ca-certificates curl systemd systemd-sysv dbus sudo \
+  && apt-get clean && rm -rf /var/lib/apt/lists/* /var/log/apt/* /var/log/dpkg.log
+
+FROM base AS bun
+ARG BUN_URL
+ARG BUN_SHA256_AMD64
+ARG BUN_LICENSE_URL
+ARG BUN_LICENSE_SHA256
+# Official oven-sh/bun canary (npm @oven/bun-linux-x64), the build packaged as factory/usr bun-canary.
+ADD --checksum=sha256:${BUN_SHA256_AMD64} ${BUN_URL} /tmp/bun.tgz
+ADD --checksum=sha256:${BUN_LICENSE_SHA256} ${BUN_LICENSE_URL} /tmp/bun-LICENSE.md
+RUN cd /tmp && tar -xzf bun.tgz && install -m755 package/bin/bun /usr/local/bin/bun \
+  && install -Dm644 /tmp/bun-LICENSE.md /usr/share/licenses/bun-canary/LICENSE.md \
+  && rm -rf /tmp/bun* /tmp/package
+
+FROM base AS desktop
+COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=bun /usr/share/licenses/bun-canary/ /usr/share/licenses/bun-canary/
+ARG COSMIC_APT_SERVER
+ARG COSMIC_APT_SUITE
+ARG COSMIC_APT_KEY
+# COSMIC comes from System76's archive (not in Ubuntu 26.10); pinned low so it only supplies what Ubuntu lacks.
+RUN set -e; ln -s bun /usr/local/bin/bunx; apt-get update \
+  && apt-get install -y --no-install-recommends gnupg \
+  && curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${COSMIC_APT_KEY}" | gpg --dearmor >/usr/share/keyrings/pop-os.gpg \
+  && gpg --show-keys --with-colons /usr/share/keyrings/pop-os.gpg | grep -q "^fpr:::::::::${COSMIC_APT_KEY}:" \
+  && install -d /etc/crypto-policies/back-ends \
+  && sed 's/^sha1.second_preimage_resistance = .*/sha1.second_preimage_resistance = 2027-02-01  # Pop!_OS key binding is SHA-1/' \
+       /usr/share/apt/default-sequoia.config >/etc/crypto-policies/back-ends/apt-sequoia.config \
+  && echo "deb [signed-by=/usr/share/keyrings/pop-os.gpg] ${COSMIC_APT_SERVER} ${COSMIC_APT_SUITE} main" >/etc/apt/sources.list.d/pop-os.list \
+  && printf 'Package: *\nPin: origin apt.pop-os.org\nPin-Priority: 100\n' >/etc/apt/preferences.d/pop-os \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends gnome-shell gnome-session gdm3 gnome-terminal nautilus \
+       xdg-desktop-portal-gnome pipewire wireplumber mesa-vulkan-drivers fonts-noto-core \
+  && missing="" && : >/tmp/cosmic \
+  && for p in cosmic-session cosmic-comp cosmic-panel cosmic-launcher cosmic-settings cosmic-files cosmic-term cosmic-greeter xdg-desktop-portal-cosmic; do \
+       if apt-cache show "$p" >/dev/null 2>&1; then echo "$p" >>/tmp/cosmic; else missing="$missing $p"; fi; done \
+  && if [ -s /tmp/cosmic ]; then apt-get install -y --no-install-recommends $(cat /tmp/cosmic); fi \
+  && install -d /usr/share/bun-os && printf '%s\n' $missing >/usr/share/bun-os/missing-packages.txt \
+  && apt-get purge -y --auto-remove gnupg \
+  && apt-get clean && rm -rf /var/lib/apt/lists/* /var/log/apt/* /var/log/dpkg.log /tmp/cosmic
+COPY os-release.fragment /usr/share/bun-os/os-release.fragment
+CMD ["/bin/bash"]
+
+FROM desktop AS bootable
+ARG KERNEL_BASE_URL
+ARG KERNEL_IMAGE_DEB
+ARG KERNEL_IMAGE_SHA256
+ARG KERNEL_MODULES_DEB
+ARG KERNEL_MODULES_SHA256
+ADD --checksum=sha256:${KERNEL_IMAGE_SHA256} ${KERNEL_BASE_URL}/${KERNEL_IMAGE_DEB} /tmp/kernel/
+ADD --checksum=sha256:${KERNEL_MODULES_SHA256} ${KERNEL_BASE_URL}/${KERNEL_MODULES_DEB} /tmp/kernel/
+RUN apt-get update && apt-get install -y --no-install-recommends initramfs-tools kmod linux-firmware systemd-boot-efi \
+  && apt-get install -y /tmp/kernel/*.deb \
+  && apt-get clean && rm -rf /var/lib/apt/lists/* /var/log/apt/* /var/log/dpkg.log /tmp/kernel \
+  && systemctl enable gdm3 || true

@@ -1,0 +1,10 @@
+# Bun OS production tier (aphrody.com, API, WebOS, sessions). Highest CPU and I/O weight and hard memory protection,
+# so builds on the same host can never starve it (docs/ops/BUILD.md, Resources).
+[Unit]
+Description=Bun OS production services
+Before=slices.target
+[Slice]
+CPUWeight=1000
+IOWeight=1000
+MemoryMin=8G
+MemoryLow=12G

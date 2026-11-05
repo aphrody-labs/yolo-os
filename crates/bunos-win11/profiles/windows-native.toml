@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# windows-native: the Bun OS desktop on a running Windows 11, drawn by Windows itself (docs/WINDOWS-ARCHITECTURE.md).
+#   bunos-win11 plan  --config crates/bunos-win11/profiles/windows-native.toml
+#   bunos-win11 apply --config crates/bunos-win11/profiles/windows-native.toml
+#   bunos-win11 undo
+# Standard debloat plus the look and latency tweaks. The engine's guardrails still refuse Defender, Windows Update,
+# WSL/Hyper-V, the Store, WebView2, runtimes, networking and the Bun OS/agent services whatever this file says.
+target = "live"
+level = "standard"
+desktop = "windows-native"
+exclude = [
+  # The owner's choice, not a default: OneDrive may still back known folders.
+  "edge-onedrive.onedrive-policy",
+  # Preference, not part of the look: keep the taskbar where the user put it.
+  "shell.taskbar-left",
+  # Animation effects are off on purpose on latency-tuned desktops; opt in by removing this line.
+  "look.animations",
+]

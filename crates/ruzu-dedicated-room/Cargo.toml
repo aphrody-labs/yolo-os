@@ -1,0 +1,22 @@
+[package]
+name = "dedicated_room"
+publish = false
+version.workspace = true
+edition = "2021"
+rust-version.workspace = true
+license = "GPL-3.0-or-later"
+
+[[bin]]
+name = "dedicated-room"
+path = "src/main.rs"
+
+[dependencies]
+common = { workspace = true }
+network = { workspace = true }
+web_service = { workspace = true }
+clap = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

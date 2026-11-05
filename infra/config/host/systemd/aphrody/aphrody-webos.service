@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=aphrody.com server (Rust aphrody-webos, ADR-003)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/apps/webos/current
+Environment=WEBOS_ADDR=127.0.0.1:8790
+Environment=WEBOS_CLIENT_DIR=/home/ubuntu/apps/webos/current/client
+Environment=WEBOS_OBJECTS=/home/ubuntu/apps/webos/objects
+# The Bun OS desktop stream (ADR-003, one session type). Until the unified image streams COSMIC, the Android
+# gateway is the fallback path; it speaks aphrody-webos-protocol natively (H.264 over WebCodecs).
+Environment=WEBOS_SESSION=ws://127.0.0.1:8799/api/android/stream
+Environment=WEBOS_SESSION_MODE=native
+Environment=WEBOS_SESSION_TOKEN_FILE=/etc/aphrody/android.token
+EnvironmentFile=/etc/aphrody/webos-session.env
+EnvironmentFile=/home/ubuntu/apps/webos/current/release.env
+ExecStart=/home/ubuntu/apps/webos/current/aphrody-webos
+Restart=always
+RestartSec=3
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+MemoryMax=512M
+CPUQuota=200%
+TasksMax=128
+
+[Install]
+WantedBy=multi-user.target

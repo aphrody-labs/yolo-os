@@ -1,0 +1,677 @@
+{
+  "schemaVersion": 1,
+  "owner": "aphrody-infra",
+  "supervisor": "systemd",
+  "proxy": "nginx",
+  "services": [
+    {
+      "id": "aphrody-video-editor",
+      "application": "aphrody",
+      "kind": "bun-static-editor",
+      "runtime": "bun",
+      "unit": "aphrody-video-editor.service",
+      "host": "vps",
+      "port": 8765,
+      "health": "http://127.0.0.1:8765/health",
+      "sourceRepo": "bun-distribution",
+      "workingDirectory": "/home/ubuntu/src/bun-os/vendor/bun-video",
+      "releaseRoot": "/home/ubuntu/apps/aphrody-video-editor/releases",
+      "public": true,
+      "publicProxy": "nginx",
+      "note": "Rust/WASM Aphrody Video editor from the absorbed FilmCraft owner. Bun.serve binds loopback; NGINX publishes only craft.aphrody.app/film/. Browser projects/media remain in OPFS. Deploy requires qualified versioned web artifacts and retained rollback; other Craft paths remain with their existing owners."
+    },
+    {
+      "id": "aphrody-bun-os",
+      "application": "aphrody",
+      "kind": "docker",
+      "runtime": "bun",
+      "host": "vps",
+      "port": 18804,
+      "health": "http://127.0.0.1:18804/api/webos/capabilities",
+      "sourceRepo": "aphrody",
+      "public": false,
+      "publicProxy": "nginx",
+      "note": "Retired 2026-10-23 with the WebOS: os.aphrody.com redirects to bun.aphrody.com, so the /desktop/ container (compose owner scripts/aphrody/deploy/docker/bun-os.compose.yaml, loopback 18804) no longer has a route; no image or container is kept on the vps.",
+      "status": "retired",
+      "retiredAt": "2026-10-23"
+    },
+    {
+      "id": "aphrody-dbfr-site",
+      "application": "aphrody",
+      "kind": "http-origin",
+      "runtime": "none",
+      "health": "http://10.200.77.3:18803/health",
+      "port": 18803,
+      "host": "dbfr",
+      "sourceRepo": "aphrody",
+      "public": true,
+      "publicProxy": "nginx",
+      "note": "Actual existing apex origin through WireGuard, confirmed 2026-10-11: /health204, /docs200. Lifecycle remains owned by the existing DBFR deployment; public WebOS adds only an exact static prefix at the VPS edge. The separate staged Rust aphrody-site service is preserved."
+    },
+    {
+      "id": "aphrody-public-webos",
+      "application": "aphrody",
+      "kind": "nginx-static",
+      "runtime": "none",
+      "sourceRepo": "aphrody",
+      "releaseRoot": "/var/www/aphrody-public-webos/releases",
+      "publicProxy": "nginx",
+      "public": true,
+      "host": "vps",
+      "note": "Browser-local public WebOS demonstration and three public checksummed Bun package archives at /labs/webos/. Exact Nginx allowlist only; no host/model/application upstream. Omar remains private at10.200.77.10; the VPS omar.aphrody.com vhost refuses public requests with403 and preserves its dedicated certificate. Source packages/bun-webos/public-site in the abandoned Bun fork (legacy); docs/operations/infra/public-webos-2026-10-11.md. Existing private Omar services and DBFR apex origin remain separate."
+    },
+    {
+      "id": "aphrody-fonts-proxy",
+      "application": "aphrody-google",
+      "kind": "bun-edge-proxy",
+      "runtime": "bun",
+      "unit": "aphrody-fonts-proxy.service",
+      "health": "http://127.0.0.1:8796/health",
+      "port": 8796,
+      "sourceRepo": "aphrody",
+      "workingDirectory": "/home/ubuntu/apps/cdn/src",
+      "publicProxy": "nginx",
+      "public": true,
+      "host": "vps"
+    },
+    {
+      "id": "aphrody-downloads",
+      "application": "aphrody",
+      "kind": "bun-download-server",
+      "runtime": "bun",
+      "unit": "aphrody-downloads.service",
+      "health": "http://127.0.0.1:8797/health",
+      "port": 8797,
+      "sourceRepo": "aphrody",
+      "workingDirectory": "/home/ubuntu/apps/downloads/app",
+      "releaseRoot": "/home/ubuntu/apps/downloads/releases",
+      "publicProxy": "nginx",
+      "note": "read-only download site (index, latest.json, SHA256SUMS, install.sh, install.ps1, artifacts): public and unauthenticated by design, it serves published checksummed release files only; published by scripts/release/publish-downloads.ts from tools/config/downloads.json (docs/operations/infra/DOWNLOADS.md)",
+      "public": true,
+      "host": "vps"
+    },
+    {
+      "id": "aphrody-creator",
+      "application": "aphrody",
+      "kind": "nginx-static",
+      "runtime": "none",
+      "sourceRepo": "aphrody",
+      "releaseRoot": "/home/ubuntu/apps/creator/releases",
+      "publicProxy": "nginx",
+      "note": "static download page of creator-kit (Material 3 page, latest.json, packs) served from /home/ubuntu/apps/creator/current by the vps nginx (vhost nginx/aphrody/creator.aphrody.com.conf), no application origin and no unit; public and unauthenticated by design, published by scripts/release/publish-creator.ts (docs/operations/infra/CREATOR.md)",
+      "public": true,
+      "host": "vps"
+    },
+    {
+      "id": "aphrody-bun-site",
+      "application": "aphrody",
+      "kind": "nginx-static",
+      "runtime": "none",
+      "sourceRepo": "aphrody",
+      "publicProxy": "nginx",
+      "note": "bun.aphrody.com is a permanent redirect to https://aphrody.app, where the site of the abandoned Bun runtime fork (legacy; home, /runtime, docs, downloads, installers) and its API run on Cloudflare (Worker aphrody-app, packages/bun-cloudflare/app of the fork, published by scripts/aphrody/site/publish.ts from the user timer aphrody-site-publish on the vps); vhost nginx/aphrody/bun.aphrody.com.conf (docs/reference/upstream-bun/APHRODY-FORK.md)",
+      "public": true,
+      "host": "vps"
+    },
+    {
+      "id": "aphrody-os",
+      "application": "aphrody",
+      "kind": "nginx-static",
+      "runtime": "none",
+      "sourceRepo": "aphrody",
+      "publicProxy": "nginx",
+      "note": "os.aphrody.com is a permanent redirect to https://bun.aphrody.com since the WebOS was removed on 2026-10-23 (vhost nginx/aphrody/os.aphrody.com.conf); no bundle, origin or unit.",
+      "public": true,
+      "host": "vps"
+    },
+    {
+      "id": "aphrody-ai-gateway-omar",
+      "application": "aphrody",
+      "kind": "openai-compatible-gateway",
+      "runtime": "native",
+      "host": "omar-pc",
+      "health": "http://127.0.0.1:8081/health",
+      "port": 8081,
+      "modelId": "omar-qwen3",
+      "capabilities": ["chat"],
+      "sourceRepo": "aphrody",
+      "public": false,
+      "note": "Omar GPU gateway alias over the existing boot-managed Omar Llama CUDA service. The process remains owned by OmarServer and authenticates through its protected api-key file. Replace DBFR gateway only after an authenticated remote health and chat probe through the declared tunnel."
+    },
+    {
+      "id": "aphrody-ai-gateway-dbfr",
+      "application": "aphrody",
+      "kind": "openai-compatible-gateway",
+      "runtime": "rust",
+      "unit": "aphrody-ai-gateway-dbfr.service",
+      "host": "dbfr",
+      "health": "http://127.0.0.1:8786/health",
+      "port": 8786,
+      "capabilities": ["chat"],
+      "sourceRepo": "aphrody",
+      "public": false,
+      "note": "Persistent authenticated Aphrody OpenAI-compatible gateway on DBFR, bound to loopback only. Forwards to the local llama server at 127.0.0.1:8799/v1; no Nginx route or public inference endpoint."
+    },
+    {
+      "id": "aphrody-site",
+      "application": "aphrody",
+      "kind": "rust-site",
+      "runtime": "rust",
+      "unit": "aphrody-site.service",
+      "health": "http://127.0.0.1:8083/health",
+      "port": 8083,
+      "host": "vps",
+      "sourceRepo": "aphrody",
+      "workingDirectory": "/home/ubuntu/apps/aphrody/current",
+      "releaseRoot": "/home/ubuntu/apps/aphrody/releases",
+      "public": false,
+      "publicProxy": "nginx",
+      "staged": true,
+      "note": "Native read-only Rust product site (crates/web/site) on loopback 127.0.0.1:8083 behind nginx (vhost nginx/aphrody/aphrody.com.conf, Let's Encrypt), no network capability under systemd since 2026-10-10. nginx serves / and the app-ui assets from /var/www/aphrody.com and proxies the other paths (/docs, templates, Material 3) here. MCP/A2A/host/provider APIs remain separately protected."
+    },
+    {
+      "id": "aphrody-web-api",
+      "application": "aphrody",
+      "kind": "bun-http",
+      "runtime": "bun",
+      "unit": "aphrody-web-api.service",
+      "health": "http://127.0.0.1:3007/health",
+      "sourceRepo": "aphrody-web",
+      "workingDirectory": "/home/ubuntu/apps/aphrody/current",
+      "publicProxy": "aphrody-site",
+      "public": false,
+      "status": "retired",
+      "retiredAt": "2026-09-25"
+    },
+    {
+      "id": "aphrody-ai-http",
+      "application": "aphrody",
+      "kind": "rust-http",
+      "runtime": "rust",
+      "unit": "aphrody-ai-http.service",
+      "health": "http://127.0.0.1:8789/healthz",
+      "port": 8789,
+      "capabilities": ["ai-http"],
+      "sourceRepo": "aphrody-ai",
+      "workingDirectory": "/home/ubuntu/apps/aphrody/current",
+      "publicProxy": "nginx",
+      "public": false,
+      "status": "retired",
+      "retiredAt": "2026-09-25",
+      "note": "The previously observed WSL compute reverse tunnel was inactive on the VPS on 2026-10-11 (no listener on port 8789); this retired record documents the earlier reservation."
+    },
+    {
+      "id": "aphrody-mcp-http",
+      "application": "aphrody",
+      "kind": "rust-http",
+      "runtime": "rust",
+      "unit": "aphrody-mcp-http.service",
+      "health": "http://127.0.0.1:8793/healthz",
+      "port": 8793,
+      "sourceRepo": "aphrody",
+      "workingDirectory": "/home/ubuntu/apps/aphrody/shared/agent-workspaces/aphrody",
+      "public": false,
+      "host": "vps",
+      "capabilities": ["jobs", "web-crawl", "obscura-browser"],
+      "note": "Private VPS MCP for local queue control and crawl/browser tools. Isolated queue under /home/ubuntu/.aphrody; no DBFR queue or public listener. Enable only after jobs+mcp-jobs binary, protected bearer and authenticated probes are qualified."
+    },
+    {
+      "id": "aphrody-web-browser-vps",
+      "application": "aphrody",
+      "kind": "rust-http",
+      "runtime": "rust",
+      "unit": "aphrody-web-browser-vps.service",
+      "health": "http://127.0.0.1:9222/json/version",
+      "port": 9222,
+      "sourceRepo": "aphrody",
+      "workingDirectory": "/home/ubuntu/.aphrody/private/web",
+      "public": false,
+      "host": "vps",
+      "capabilities": ["obscura-cdp"],
+      "note": "Loopback-only Obscura CDP engine used by the VPS Playwright rendering bridge."
+    },
+    {
+      "id": "aphrody-web-playwright-vps",
+      "application": "aphrody",
+      "kind": "bun-http",
+      "runtime": "bun",
+      "unit": "aphrody-web-playwright-vps.service",
+      "health": "http://127.0.0.1:9230/health",
+      "port": 9230,
+      "sourceRepo": "aphrody",
+      "workingDirectory": "/home/ubuntu/src/bun-os",
+      "public": false,
+      "host": "vps",
+      "capabilities": ["web-crawl-playwright"],
+      "note": "Loopback-only bounded Playwright renderer connected to the VPS Obscura CDP engine; the Rust crawler retains traversal and source policy."
+    },
+    {
+      "id": "aphrody-a2a",
+      "application": "aphrody",
+      "kind": "rust-http",
+      "runtime": "rust",
+      "unit": "aphrody-a2a.service",
+      "health": "http://127.0.0.1:8788/ping",
+      "port": 8788,
+      "capabilities": ["a2a"],
+      "sourceRepo": "aphrody",
+      "workingDirectory": "/home/ubuntu/apps/aphrody/shared/agent-workspaces/aphrody",
+      "a2a": {
+        "registry": "tools/config/a2a-peers.json",
+        "peer": "aphrody",
+        "rpcPath": "/",
+        "agentCardPath": "/.well-known/agent-card.json"
+      },
+      "public": false,
+      "note": "Retiré de dbfr : A2A n a plus d unité locale (docs/operations/workspace/codex-vps-relay-2026-10-09.md). Runbook historique: docs/operations/infra/MCP-A2A.md.",
+      "host": "dbfr",
+      "status": "retired",
+      "retiredAt": "2026-10-09"
+    },
+    {
+      "id": "aphrody-mcp-http-dbfr",
+      "application": "aphrody",
+      "kind": "rust-http",
+      "runtime": "rust",
+      "unit": "aphrody-mcp-http-dbfr.service",
+      "container": "aphrody-mcp-http-1",
+      "health": "http://127.0.0.1:8793/healthz",
+      "port": 8793,
+      "sourceRepo": "aphrody",
+      "workingDirectory": "/home/ubuntu/.aphrody",
+      "public": false,
+      "note": "DBFR canonical native MCP with jobs enabled, protected host-local bearer, loopback127.0.0.1:8793. Private WireGuard projection must bind DBFR address10.200.77.3, never the VPS hub address. Activation requires qualified jobs binary and authentication probes. Since 2026-10-09 the compose service mcp-http (aphrody:toolbox, tools/config/container/compose.yaml, host network, uid 1000).",
+      "host": "dbfr"
+    },
+    {
+      "id": "aphrody-jobs-worker-vps",
+      "application": "aphrody",
+      "kind": "rust-worker",
+      "runtime": "rust",
+      "unit": "aphrody-jobs-worker-vps.service",
+      "sourceRepo": "aphrody",
+      "workingDirectory": "/home/ubuntu/.aphrody",
+      "public": false,
+      "host": "vps",
+      "note": "Persistent local SQLite queue worker, host affinity vps, concurrency 1. The VPS queue is independent of DBFR and is not synchronized or shared."
+    },
+    {
+      "id": "aphrody-jobs-worker-dbfr",
+      "application": "aphrody",
+      "kind": "rust-worker",
+      "runtime": "rust",
+      "unit": "aphrody-jobs-worker-dbfr.service",
+      "container": "aphrody-jobs-worker-1",
+      "sourceRepo": "aphrody",
+      "workingDirectory": "/home/ubuntu/.aphrody",
+      "public": false,
+      "host": "dbfr",
+      "note": "Persistent local SQLite queue with fenced leases, capability filtering and bounded native web-pipeline/transcribe handlers. Inputs and credentials remain in protected host stores; no training role or network transport is granted. Since 2026-10-09 the compose service jobs-worker (aphrody:toolbox)."
+    },
+    {
+      "id": "omar-redis",
+      "application": "omar",
+      "kind": "cache",
+      "runtime": "redis",
+      "container": "omar-redis",
+      "host": "omar-pc",
+      "health": "tcp://127.0.0.1:6379",
+      "target": "local:127.0.0.1:6379",
+      "public": false,
+      "note": "Redis 8.10.2, authenticated loopback; Bun native Redis client, durable AOF/RDB volume. Compose owner C:/SSH/omar-server/config/redis.compose.yml; maxmemory 512MiB, Docker memory 768MiB."
+    },
+    {
+      "id": "omar-browser-client-vps",
+      "application": "omar",
+      "kind": "browser-proxy",
+      "runtime": "ssh",
+      "host": "vps",
+      "unit": "aphrody-obscura-omar-client.service",
+      "health": "http://127.0.0.1:9223/health",
+      "target": "vps:127.0.0.1:9223",
+      "public": false,
+      "note": "Authenticated SSH loopback projection to Bun 1.4.4 browser bridge on Omar PC 127.0.0.1:9233; no engine or JS runtime installed remotely. Index origin http://omar.aphrody.com."
+    },
+    {
+      "id": "omar-playwright-mcp",
+      "application": "omar",
+      "kind": "browser-proxy",
+      "runtime": "bun",
+      "host": "omar-pc",
+      "health": "http://127.0.0.1:9235/health",
+      "target": "local:127.0.0.1:9234",
+      "public": false,
+      "note": "Owner-PC Playwright MCP projection through authenticated SSH only. Loopback 127.0.0.1:9234, health 9235; PC task is separately provisioned and must pass health/tools-list probes before use."
+    },
+    {
+      "id": "omar-browser-client-dbfr",
+      "application": "omar",
+      "kind": "browser-proxy",
+      "runtime": "ssh",
+      "host": "dbfr",
+      "health": "http://127.0.0.1:9223/health",
+      "target": "dbfr:127.0.0.1:9223",
+      "public": false,
+      "note": "Authenticated SSH loopback projection to Bun 1.4.4 browser bridge on Omar PC 127.0.0.1:9233; no engine or JS runtime installed remotely. Index origin http://omar.aphrody.com."
+    },
+    {
+      "id": "omar-browser-bridge",
+      "application": "omar",
+      "kind": "browser-proxy",
+      "runtime": "bun",
+      "host": "omar-pc",
+      "health": "http://127.0.0.1:9233/health",
+      "target": "omar-pc:127.0.0.1:9233",
+      "public": false,
+      "note": "Bun 1.4.4 SSH-only browser bridge on Omar PC; upstream Obscura Bearer auth retained."
+    },
+    {
+      "id": "aphrody-deploy",
+      "application": "aphrody",
+      "kind": "docker",
+      "runtime": "rust",
+      "host": "vps",
+      "port": 29021,
+      "health": "http://127.0.0.1:29021/",
+      "container": "aphrody-komodo-core",
+      "public": true,
+      "publicProxy": "nginx",
+      "capabilities": ["deploy-control"],
+      "note": "Komodo2.3.3; authenticated Core, private Mongo and PKI Periphery. Canonical Infra catalogs remain the desired-state owner."
+    },
+    {
+      "id": "aphrody-bun-os-server",
+      "application": "aphrody",
+      "kind": "native-application",
+      "runtime": "bun",
+      "unit": "aphrody-bun-os-server.service",
+      "host": "vps",
+      "port": 29030,
+      "health": "http://127.0.0.1:29030/healthz",
+      "sourceRepo": "bun-distribution",
+      "workingDirectory": "/home/ubuntu/src/bun-os/install/bin",
+      "releaseRoot": "/home/ubuntu/src/bun-os/install/bin",
+      "public": false,
+      "publicProxy": "nginx",
+      "required": true,
+      "note": "Unified Bun OS read-only catalog API. Linux x86-64 binary compiled/executed at root1eedaa8;9 localHTTP checks pass, install SHA matches. Existing Infra lifecycle owns activation. Protected bearer provisioned; candidate unit/nginx syntax pass. Automatic tool review rejected grouped unit/snippet installation and service activation before execution (blocked by policy). Promoted to the active unified server (required): the one Bun server behind the product API; activation itself stays with Infra. /api/product/v1/ preserves Gitea /api/v1/."
+    }
+  ],
+  "policies": {
+    "oneUnitPerWorkload": true,
+    "onePublicProxy": true,
+    "releasePlanes": {
+      "aphrody": {
+        "current": "/home/ubuntu/apps/aphrody/current",
+        "adapter": "scripts/release/atomic-deploy-aphrody-stack.sh"
+      }
+    },
+    "applicationRoots": {
+      "aphrody-web": "/home/ubuntu/apps/aphrody/current",
+      "aphrody-ai": "/home/ubuntu/apps/aphrody/current"
+    },
+    "secrets": "operator-managed-environment-files",
+    "retiredUnits": ["filebrowser.service"],
+    "sharedRuntimes": ["bun", "postgresql", "redis", "nginx"],
+    "databasePolicy": "postgresql-primary-with-sqlite-local-cache",
+    "authPolicy": "one-better-auth-contract-per-public-origin"
+  },
+  "boot": {
+    "$comment": "Unified boot-persistence desired state (docs/operations/infra/BOOT.md). Non-retired services above are derived automatically (unit or container on their host); these entries add timers, sockets, wrappers, Windows tasks and services. `hold` = audited, never corrected by apply. Checked with `aphrody infra boot audit`.",
+    "entries": [
+      {
+        "host": "vps",
+        "kind": "systemd",
+        "unit": "aphrody-selfheal.timer"
+      },
+      {
+        "host": "dbfr",
+        "kind": "systemd",
+        "unit": "aphrody-selfheal.timer"
+      },
+      {
+        "host": "dbfr",
+        "kind": "systemd",
+        "unit": "aphrody-web-browser-dbfr.service"
+      },
+      {
+        "host": "dbfr",
+        "kind": "systemd",
+        "unit": "aphrody-wg-proxy@8793.socket"
+      },
+      {
+        "host": "vps",
+        "kind": "systemd",
+        "unit": "aphrody-wg-proxy@8793.socket"
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "Aphrody WG aphro-pc",
+        "triggers": ["atStartup"],
+        "principal": "system"
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "Aphrody MCP HTTP",
+        "triggers": ["atStartup", "atLogon"],
+        "principal": "user"
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "Aphrody Remote Desktop",
+        "triggers": ["atLogon"],
+        "principal": "user",
+        "desktop": true
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "hub-tunnel",
+        "path": "\\Aphrody\\Native\\",
+        "triggers": ["atLogon"],
+        "principal": "user"
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "site",
+        "path": "\\Aphrody\\Native\\",
+        "triggers": ["atStartup"],
+        "principal": "system",
+        "execute": "%USERPROFILE%\\.bun\\bin\\bun.exe",
+        "arguments": "--no-env-file scripts/aphrody/tools/infra/native-startup.ts run site --config %USERPROFILE%\\.aphrody\\host\\aphrody-startup.json",
+        "workingDirectory": "{root}",
+        "description": "Aphrody Infra native startup v1: native product site declared in <home>/host/aphrody-startup.json (scripts/tools/infra/native-startup.ts)."
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "Net Env Probe",
+        "triggers": [],
+        "principal": "user",
+        "periodic": true,
+        "execute": "conhost.exe",
+        "arguments": "--headless \"%USERPROFILE%\\.bun\\bin\\bun.exe\" packages/engine/core/src/host/cli.ts net-env --probe --facts --write --ssh-config --push vps --fiche vps --fiche-memory C:/Users/aphro/.claude/projects/C--aphrody/memory/aphro/omar.md",
+        "workingDirectory": "{root}"
+      },
+      {
+        "host": "omar-pc",
+        "kind": "windowsService",
+        "name": "AphrodyHost",
+        "restartOnFailure": true
+      },
+      {
+        "host": "local",
+        "kind": "windowsService",
+        "name": "sshd",
+        "restartOnFailure": true
+      },
+      {
+        "host": "local",
+        "kind": "windowsService",
+        "name": "WireGuardManager"
+      },
+      {
+        "host": "local",
+        "kind": "windowsService",
+        "name": "WireGuardTunnel$aphrody",
+        "restartOnFailure": true
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "Container",
+        "triggers": ["atLogon"],
+        "principal": "user",
+        "desktop": true,
+        "periodic": true,
+        "execute": "%USERPROFILE%\\.bun\\bin\\bun.exe",
+        "arguments": "--no-env-file scripts/install/container-service.ts",
+        "workingDirectory": "{root}",
+        "description": "Aphrody container (compose profile pc) on the loopback API: scripts/install/container-service.ts."
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "VNC Omar Probe",
+        "triggers": [],
+        "principal": "user",
+        "desktop": true,
+        "periodic": true
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "Aphrody self update",
+        "path": "\\",
+        "triggers": ["every:30m", "atLogon"],
+        "principal": "user",
+        "runLevel": "limited",
+        "periodic": true,
+        "execute": "%LOCALAPPDATA%\\aphrody\\bin\\aphrody.exe",
+        "arguments": "self update",
+        "timeLimitMinutes": 15,
+        "description": "Install the release published in latest.json (aphrody self update, with rollback)."
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "AphrodyBunHygiene",
+        "path": "\\",
+        "triggers": ["daily@05:30"],
+        "principal": "user",
+        "runLevel": "limited",
+        "periodic": true,
+        "execute": "%USERPROFILE%\\.bun\\bin\\bun.exe",
+        "arguments": "--no-env-file scripts/tools/bun-hygiene.ts",
+        "workingDirectory": "{root}",
+        "timeLimitMinutes": 60,
+        "description": "Aphrody Bun hygiene: newest fork release at least 3 days old, package-manager report (scripts/tools/bun-hygiene.ts)."
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "Omar Nginx",
+        "principal": "system",
+        "triggers": ["atStartup"],
+        "execute": "C:/Users/omara/AppData/Local/Microsoft/WinGet/Packages/nginxinc.nginx_Microsoft.Winget.Source_8wekyb3d8bbwe/nginx-1.31.6/nginx.exe",
+        "arguments": "-p C:/SSH/omar-server/nginx/ -c nginx.conf -g \"daemon off;\"",
+        "workingDirectory": "C:/SSH/omar-server/nginx",
+        "description": "Native PC dashboard gateway on loopback and WireGuard port 80. Typed route owner: tools/config/host/nginx/omar-pc.json.",
+        "hold": "Lifecycle owned by OmarServer Windows service (Bun supervisor, C:/SSH/omar-server/services.json); legacy task disabled for recovery."
+      },
+      {
+        "host": "local",
+        "kind": "windowsService",
+        "name": "OmarBeszelAgent",
+        "restartOnFailure": true
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "Omar Llama CUDA",
+        "principal": "system",
+        "triggers": ["atStartup"],
+        "execute": "C:/Users/omara/.aphrody/runtimes/llama-b11552-cuda/llama-server.exe",
+        "arguments": "--model C:/Users/omara/.aphrody/models/omar-server/Qwen3-0.6B-Q8_0.gguf --host 127.0.0.1 --port 8081 --n-gpu-layers 99 --ctx-size 2048 --parallel 1 --alias omar-qwen3 --api-key-file C:/Users/omara/.aphrody/private/omar-server/llama-api-key.txt",
+        "workingDirectory": "C:/Users/omara/.aphrody/runtimes/llama-b11552-cuda",
+        "description": "Native CUDA inference with authenticated OpenAI-compatible API behind Nginx /llama/.",
+        "hold": "Lifecycle owned by OmarServer Windows service (Bun supervisor, C:/SSH/omar-server/services.json); legacy task disabled for recovery."
+      },
+      {
+        "host": "local",
+        "kind": "docker",
+        "container": "omar-beszel"
+      },
+      {
+        "host": "local",
+        "kind": "windowsService",
+        "name": "OmarServer",
+        "restartOnFailure": true
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "Aphrody omar reverse",
+        "path": "\\Aphrody\\",
+        "triggers": ["atStartup", "atLogon"],
+        "principal": "user",
+        "execute": "C:\\Windows\\System32\\bun.exe",
+        "arguments": "--no-env-file C:\\aphrody\\scripts\\tools\\infra\\ssh-reverse-task.ts C:\\Users\\omara\\.aphrody\\private\\state\\reverse-tunnel.json",
+        "description": "Aphrody native reverse SSH tunnel for Omar PC services; no WSL forward.",
+        "workingDirectory": "C:\\Users\\omara\\.ssh"
+      },
+      {
+        "host": "local",
+        "kind": "scheduledTask",
+        "name": "Omar Playwright MCP",
+        "path": "\\Aphrody\\",
+        "triggers": ["atLogon"],
+        "principal": "user",
+        "runLevel": "limited",
+        "execute": "C:\\Users\\omara\\.bun\\bin\\bun.exe",
+        "arguments": "--no-env-file C:\\SSH\\omar\\server\\playwright-mcp-supervisor.ts",
+        "workingDirectory": "C:\\SSH\\omar\\server",
+        "description": "Private local Playwright MCP supervisor; loopback only on 9234 with health 9235."
+      },
+      {
+        "host": "local",
+        "kind": "docker",
+        "container": "omar-redis"
+      },
+      {
+        "host": "vps",
+        "kind": "systemd",
+        "unit": "aphrody-obscura-omar-client.service"
+      },
+      {
+        "host": "dbfr",
+        "kind": "systemd",
+        "unit": "aphrody-obscura-omar-client.service"
+      },
+      {
+        "host": "local",
+        "kind": "windowsService",
+        "name": "OmarBrowserBridge",
+        "restartOnFailure": true
+      },
+      {
+        "host": "aphro-pc",
+        "kind": "scheduledTask",
+        "name": "Aphrody Omar Browser",
+        "path": "\\Aphrody\\",
+        "triggers": ["atStartup", "atLogon"],
+        "execute": "C:/Program Files/OpenSSH/ssh.exe",
+        "arguments": "-N -T -o BatchMode=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -L 127.0.0.1:9223:127.0.0.1:9233 omar-pc",
+        "workingDirectory": "C:/Users/aphro",
+        "description": "Private shared Bun browser from Omar PC",
+        "principal": "user",
+        "runLevel": "highest",
+        "desktop": false
+      }
+    ]
+  }
+}

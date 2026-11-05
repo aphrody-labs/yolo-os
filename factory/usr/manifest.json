@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 3,
+  "kind": "bun-os-usr",
+  "description": "Arch-style merged-usr /usr for Bun OS, assembled from real pacman packages plus Bun OS overlays",
+  "architecture": "x86_64",
+  "packageManager": "pacman/libalpm",
+  "host": "vps",
+  "builderImage": "archlinux@sha256:061679925e5d5028f2df9395d441ce6c4b9accf0157ff3486c06b6962e014ef1",
+  "builderImageObservedId": "061679925e5d",
+  "builderPackages": [
+    "git",
+    "arch-install-scripts",
+    "squashfs-tools",
+    "erofs-utils",
+    "cryptsetup",
+    "zstd",
+    "jq",
+    "curl",
+    "openssl",
+    "systemd-ukify",
+    "sbsigntools",
+    "mtools",
+    "dosfstools",
+    "qemu-system-x86",
+    "edk2-ovmf"
+  ],
+  "remoteRoot": "/home/ubuntu/bun-os-usr",
+  "remoteTimeoutSeconds": 3000,
+  "localArtifacts": "~/.local/share/bun-os/usr",
+  "repositories": [
+    {
+      "name": "cachyos",
+      "server": "https://mirror.cachyos.org/repo/$arch/$repo",
+      "keys": ["F3B607488DB35A47"],
+      "keyserver": "hkps://keyserver.ubuntu.com"
+    },
+    {
+      "name": "core",
+      "server": "https://geo.mirror.pkgbuild.com/$repo/os/$arch"
+    },
+    {
+      "name": "extra",
+      "server": "https://geo.mirror.pkgbuild.com/$repo/os/$arch"
+    },
+    {
+      "name": "multilib",
+      "server": "https://geo.mirror.pkgbuild.com/$repo/os/$arch"
+    }
+  ],
+  "chaotic": {
+    "enabled": false,
+    "reason": "Prebuilt AUR binaries are not required by any composition; enable only with an explicit package need."
+  },
+  "basePackages": [
+    "bunos-filesystem",
+    "base",
+    "linux-firmware",
+    "systemd",
+    "pacman",
+    "archlinux-keyring",
+    "cachyos-keyring",
+    "cachyos-mirrorlist",
+    "bun-canary",
+    "bunos-utils",
+    "bunos-sudo-rs",
+    "bunos-ntpd-rs",
+    "ca-certificates",
+    "man-db",
+    "man-pages"
+  ],
+  "rustBase": {
+    "description": "Rust base packages built from the aphrody-labs forks by factory/rustbase/rust-base.ts and published in the signed aphrody pacman repository; the builder verifies each file against the repository key (docs/RUST-BASE.md).",
+    "repository": "https://aphrody.com/repo/os/x86_64",
+    "key": "https://aphrody.com/repo/os/aphrody.gpg",
+    "packages": ["bunos-sudo-rs", "bunos-ntpd-rs", "bunos-crosvm"]
+  },
+  "kernelFallback": null,
+  "kernelSelection": {
+    "source": null,
+    "state": "blocked",
+    "reason": "No kernel source has been selected and qualified for the /usr factory."
+  },
+  "compositions": {
+    "server": {
+      "profile": "server",
+      "packages": ["openssh"]
+    },
+    "desktop": {
+      "profile": "desktop",
+      "packages": []
+    },
+    "gaming": {
+      "profile": "gaming",
+      "packages": ["base-devel", "wine-cachyos"]
+    }
+  },
+  "hierarchy": {
+    "rootLinks": {
+      "bin": "usr/bin",
+      "sbin": "usr/bin",
+      "lib": "usr/lib",
+      "lib64": "usr/lib"
+    },
+    "usrLinks": {
+      "sbin": "bin",
+      "lib64": "lib"
+    },
+    "usrDirectories": ["bin", "lib", "lib32", "include", "share", "local", "src", "libexec"],
+    "required": [
+      "usr/share/licenses",
+      "usr/share/man",
+      "usr/share/doc",
+      "usr/share/pacman/keyrings",
+      "usr/share/factory",
+      "usr/lib/systemd",
+      "usr/lib/sysusers.d",
+      "usr/lib/tmpfiles.d",
+      "usr/lib/os-release",
+      "usr/bin/bun"
+    ]
+  },
+  "overlay": "factory/usr/overlay",
+  "multicall": {
+    "crate": "crates/bunos-utils",
+    "binary": "usr/bin/bunos-utils",
+    "target": "x86_64-unknown-linux-gnu",
+    "features": ["binutils", "procps", "diffutils", "coreutils", "findutils", "util-linux"],
+    "appletList": "usr/share/bun-os/bunos-utils.applets",
+    "linkDir": "usr/lib/bunos-utils/bin",
+    "install": "usr/lib/bun-os/install-bunos-utils <root>",
+    "reason": "Pacman packages own the GNU names in /usr/bin; the multicall links live in linkDir and take precedence when it is prepended to PATH."
+  },
+  "images": {
+    "formats": ["erofs", "squashfs"],
+    "erofsCompression": "lz4hc,12",
+    "squashfsCompression": "zstd",
+    "verity": "optional"
+  },
+  "rootfs": {
+    "compression": "zstd",
+    "exclude": ["var/cache/pacman/pkg/*", "var/lib/pacman/sync/*"]
+  },
+  "bunos": {
+    "manifest": "factory/bunos/components.json",
+    "repository": "bunos",
+    "pkgbuilds": "factory/bunos/pkgbuilds",
+    "validate": "bun factory/bunos/validate.ts",
+    "reason": "Extra packages of the local bunos repository (aphrody, fonts, icons) and the heavy-component inventory; compositions select them through compositionPackages once the builder consumes factory/bunos/pkgbuilds next to localRepository.packages.",
+    "unpublished": {
+      "aphrody": "its Cargo path dependencies into a removed fork submodule (the fork is abandoned; the runtime is upstream oven-sh/bun) must move into crates/ before this package builds"
+    }
+  },
+  "localRepository": {
+    "name": "bunos",
+    "packages": "factory/usr/pkgs",
+    "sourceDateEpoch": 1760572800
+  },
+  "archive": {
+    "server": "https://archive.archlinux.org/repos/{date}/$repo/os/$arch",
+    "repositories": ["core", "extra", "multilib"],
+    "note": "CachyOS publishes no dated archive; the lock pins its exact files and sha256."
+  },
+  "lockDirectory": "factory/usr/locks",
+  "boot": {
+    "definitions": "factory/usr/boot",
+    "timeoutSeconds": 420,
+    "firmware": "edk2-ovmf",
+    "secureBootSigning": "ephemeral test key per job"
+  }
+}

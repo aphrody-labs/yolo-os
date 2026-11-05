@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: Apache-2.0
+# Flycast (Dreamcast, Naomi) from the Bun OS fork (vendor/flycast, aphrody-labs/flycast). Its HLE BIOS boots homebrew
+# without a Dreamcast BIOS. cmake installs the desktop entry, icons and AppStream metainfo.
+pkgname=flycast
+pkgver=2.7.r1b63c8a
+pkgrel=1
+_commit=1b63c8a3677cc8eb1292863c4fe8fc8f94674fc8
+pkgdesc='Sega Dreamcast, Naomi and Atomiswave emulator (Bun OS fork of Flycast)'
+arch=('x86_64')
+url='https://github.com/aphrody-labs/flycast'
+license=('GPL-2.0-only')
+depends=('alsa-lib' 'curl' 'libao' 'libgl' 'libpulse' 'libzip' 'lua' 'miniupnpc' 'sdl2' 'vulkan-icd-loader' 'zlib')
+makedepends=('cmake' 'git' 'ninja' 'python' 'vulkan-headers')
+options=('!debug' '!lto')
+source=("flycast::git+https://github.com/aphrody-labs/flycast.git#commit=${_commit}")
+sha256sums=('SKIP')
+
+prepare() {
+  cd flycast
+  git submodule update --init --recursive --depth 1
+}
+
+build() {
+  cmake -S flycast -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+    -DUSE_HOST_SDL=ON -DUSE_HOST_LIBZIP=ON -DUSE_VULKAN=ON
+  cmake --build build -j 4
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+  install -Dm644 flycast/LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
+}

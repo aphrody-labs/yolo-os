@@ -1,0 +1,22 @@
+{
+  "name": "@aphrody/webos",
+  "version": "1.4.7",
+  "description": "Bun OS inventory and catalog data of aphrody.com; the site itself is the Rust crates/aphrody-webos-server.",
+  "license": "Apache-2.0",
+  "author": "aphrody-dev <contact@aphrody.com>",
+  "type": "module",
+  "scripts": {
+    "inventory": "bun inventory.ts",
+    "check:coverage": "bun inventory.ts --check",
+    "typecheck": "bun check -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@aphrody/bun-workspace": "workspace:*"
+  },
+  "devDependencies": {
+    "bun-types": "catalog:"
+  },
+  "engines": {
+    "bun": "1.4.4-canary.20261028.1"
+  }
+}

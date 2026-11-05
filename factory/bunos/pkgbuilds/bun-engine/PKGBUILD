@@ -1,0 +1,52 @@
+# Bun Engine: the native emulator kernel (one Machine trait, one wgpu/winit window) and its
+# `bun-engine`/`bep` CLI and package manager, built from the Bun OS workspace.
+pkgname=bun-engine
+pkgver=0.1.0
+pkgrel=1
+_commit=866650a40194ebf255af5ae29fae15946e571abe
+pkgdesc='Bun Engine emulator kernel, CLI and multi-console package manager'
+arch=('x86_64')
+url='https://github.com/aphrody-labs/bun-distribution'
+license=('GPL-3.0-or-later')
+depends=('glibc' 'gcc-libs' 'vulkan-icd-loader' 'libxkbcommon' 'wayland' 'bun-canary')
+optdepends=('gamescope: the bunos-gamescope-session full-screen session'
+            'chromium: the frontend window (kiosk in the gamescope session)'
+            'mesa: Vulkan/GL drivers for the window and for OpenGL libretro cores (headless EGL)'
+            'libretro-shaders-slang: RetroArch slang shader presets for the native video drivers'
+            'libretro-database-git: cheats, content databases and cursors RetroArch reads from /usr/share/libretro/database (AUR, also built by omarchy-pkgs)'
+            'libretro-overlays: RetroArch bezel and controller overlays'
+            'qemu-full: reference QEMU for ARM firmware and Linux/Windows guests')
+makedepends=('git' 'rustup' 'clang' 'pkgconf' 'cmake' 'mesa' 'libx11')
+options=('!lto' '!debug')
+source=("bun-os::git+https://github.com/aphrody-labs/bun-distribution.git#commit=${_commit}")
+sha256sums=('SKIP')
+
+build() {
+  cd bun-os
+  git submodule update --init --depth 1 vendor/chipi-spec vendor/retroarch
+  bash scripts/aphrody/build/rust/cargo-serial.sh build --release --locked -p bun-engine --bin bun-engine
+  # RetroArch as a library that bun-engine drives in process through bun:ffi (host drivers, headless EGL)
+  (cd vendor/retroarch && ./configure --enable-libretroarch --enable-egl --disable-qt --disable-x11 \
+    --disable-wayland --disable-kms --disable-opengl --disable-vulkan --disable-sdl2 --disable-sdl3 \
+    --disable-pulse --disable-alsa --disable-jack --disable-oss --disable-pipewire --disable-ffmpeg \
+    --disable-udev --disable-materialui --disable-xmb --disable-ozone && make -j"$(nproc)")
+}
+
+package() {
+  cd bun-os
+  install -Dm755 target/release/bun-engine "$pkgdir/usr/lib/bun-engine/bun-engine"
+  # The TypeScript CLI is the single front door; it runs the native engine from /usr/lib/bun-engine.
+  install -dm755 "$pkgdir/usr/share/bun-engine"
+  cp -a packages/bun-engine/src packages/bun-engine/plugins packages/bun-engine/package.json \
+    "$pkgdir/usr/share/bun-engine/"
+  for cli in bun-engine:cli bep:bep; do
+    printf '#!/bin/sh\nexec bun /usr/share/bun-engine/src/%s.ts "$@"\n' "${cli#*:}" >"$srcdir/${cli%%:*}"
+    install -Dm755 "$srcdir/${cli%%:*}" "$pkgdir/usr/bin/${cli%%:*}"
+  done
+  install -Dm755 factory/bunos/pkgbuilds/bun-engine/bunos-gamescope-session "$pkgdir/usr/bin/bunos-gamescope-session"
+  install -Dm644 factory/bunos/pkgbuilds/bun-engine/bunos-gamescope.desktop     "$pkgdir/usr/share/wayland-sessions/bunos-gamescope.desktop"
+  install -Dm755 vendor/retroarch/libretroarch.so "$pkgdir/usr/lib/libretroarch.so"
+  install -Dm644 vendor/retroarch/COPYING "$pkgdir/usr/share/licenses/$pkgname/RETROARCH-COPYING"
+  install -Dm644 crates/bun-engine-core/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 crates/bun-engine-core/DUST-PROVENANCE.md "$pkgdir/usr/share/licenses/$pkgname/DUST-PROVENANCE.md"
+}

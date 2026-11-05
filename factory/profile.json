@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 3,
+  "host": "vps",
+  "distribution": "archlinux",
+  "packageManager": "pacman",
+  "packageMetadataOwner": "packages/package-converter/src/alpm.ts",
+  "architecture": "x86_64",
+  "abi": "gnu",
+  "libc": "glibc",
+  "minimumFreeBytes": 53687091200,
+  "commandTimeoutSeconds": 180,
+  "jobDeadlineSeconds": 1200,
+  "sharedHeavyLockRelative": "../locks/heavy.lock",
+  "bootstrapImage": "archlinux@sha256:061679925e5d5028f2df9395d441ce6c4b9accf0157ff3486c06b6962e014ef1",
+  "bootstrapImageObservedOn": "2026-10-16",
+  "packageBuilder": "devtools/makechrootpkg",
+  "rootfsBuilder": "factory/arch/pacman.ts",
+  "imageAssembler": "archiso/mkarchiso",
+  "repositoryBuilder": "pacman/repo-add",
+  "sourceCatalogs": ["cachyos", "chimeraos", "omarchy", "searxng"],
+  "toolchainPackages": [
+    "base-devel",
+    "devtools",
+    "archiso",
+    "archlinux-keyring",
+    "pacman",
+    "git",
+    "sd",
+    "ripgrep",
+    "fd",
+    "clang",
+    "llvm",
+    "lld",
+    "cmake",
+    "ninja",
+    "meson",
+    "rust",
+    "rust-src",
+    "rust-bindgen",
+    "pkgconf",
+    "bc",
+    "cpio",
+    "pahole",
+    "openssl",
+    "libelf",
+    "zstd",
+    "squashfs-tools",
+    "xorriso",
+    "mtools",
+    "dosfstools"
+  ],
+  "compositions": {
+    "server": {
+      "description": "Headless Bun OS; no desktop, Steam, display manager or user-home import",
+      "packages": ["base", "ca-certificates", "pacman"],
+      "session": null
+    },
+    "desktop": {
+      "description": "Bun OS desktop using the existing COSMIC owner",
+      "extends": "server",
+      "packages": ["mesa", "vulkan-icd-loader", "pipewire", "wireplumber"],
+      "defaultSession": "cosmic"
+    },
+    "gaming": {
+      "description": "Optional Gamescope gaming session and qualified device/input tools",
+      "extends": "server",
+      "packages": [
+        "gamescope",
+        "steam",
+        "mesa",
+        "vulkan-icd-loader",
+        "lib32-mesa",
+        "lib32-vulkan-icd-loader",
+        "pipewire",
+        "wireplumber"
+      ],
+      "session": "gamescope",
+      "repositories": ["core", "extra", "multilib"]
+    }
+  },
+  "desktopSessions": {
+    "cosmic": {
+      "owner": "existing Bun OS COSMIC source and package owner",
+      "session": "cosmic-session",
+      "packages": ["cosmic"],
+      "state": "unqualified",
+      "blockers": [
+        "The complete COSMIC group must resolve from a signed archive snapshot, and desktop boot/display qualification is pending."
+      ]
+    },
+    "omarchy-hyprland": {
+      "owner": "factory/arch/omarchy/integration.json",
+      "session": "Hyprland + UWSM + SDDM + Quickshell",
+      "packages": [],
+      "state": "blocked",
+      "blockers": [
+        "No compatible Omarchy session package subset has been selected from the source catalog.",
+        "No exact signed package closure or boot/session qualification exists for this session."
+      ]
+    }
+  },
+  "policy": {
+    "repositorySnapshotRequired": true,
+    "exactPackageClosureRequired": true,
+    "packageSignaturesRequired": true,
+    "cpuBaseline": "x86-64",
+    "optionalCpuVariants": ["x86-64-v3", "x86-64-v4", "znver4"],
+    "defaultKernelSource": null,
+    "kernelSourceSelectionRequired": true,
+    "kernelArtifactQualificationRequired": true,
+    "upstreamInstallerExecution": false,
+    "servicesEnabledAutomatically": false,
+    "compatibilityFactory": "factory/ubuntu.ts",
+    "compatibilityProfile": "factory/ubuntu-profile.json"
+  },
+  "references": [
+    "https://man.archlinux.org/man/pacman.8.en",
+    "https://man.archlinux.org/man/PKGBUILD.5.en",
+    "https://man.archlinux.org/man/makechrootpkg.1.en",
+    "https://github.com/CachyOS/CachyOS-PKGBUILDS",
+    "https://github.com/ChimeraOS/chimeraos",
+    "https://github.com/omacom/omarchy"
+  ]
+}

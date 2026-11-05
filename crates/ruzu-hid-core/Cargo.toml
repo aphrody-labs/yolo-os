@@ -1,0 +1,15 @@
+[package]
+name = "hid_core"
+publish = false
+version.workspace = true
+edition = "2021"
+
+[dependencies]
+common.workspace = true
+log = { workspace = true }
+bitflags.workspace = true
+parking_lot.workspace = true
+fastrand.workspace = true
+
+[dev-dependencies]
+input_common.workspace = true

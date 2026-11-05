@@ -1,0 +1,99 @@
+#!/bin/bash
+# SPDX-License-Identifier: MIT
+# qualify.sh session|disk [out-dir]: qualification of the unified image on the VPS Docker host.
+#   session: start one bunos-unified:session container with the production settings of the session manager
+#            (docs/UNIFIED-IMAGE.md), wait for /run/bunos/ready, open Helium, a web app and an Android app,
+#            list the launcher's desktop entries by kind and take screenshots of cage's output (grim).
+#   disk:    boot bunos-unified.img in QEMU/KVM (UEFI, smoke test of the disk image only), serial log + screendump.
+set -euo pipefail
+MODE=${1:?session|disk}; OUT=${2:-/home/ubuntu/bun-os-disk/qualify-$(date -u +%Y%m%dT%H%M%S)}; mkdir -p "$OUT"
+A17=${BUNOS_WAYDROID_IMAGES:-/home/ubuntu/.cache/bunos-waydroid/a17/images}
+case "$MODE" in
+session)
+  # QUALIFY_NAME: the nightly run (factory/automation) uses its own container, so a manual qualification is untouched.
+  name=${QUALIFY_NAME:-bunos-unified-manual-$(date -u +%Y%m%dT%H%M%S)}; docker rm -f "$name" >/dev/null 2>&1 || true
+  # Android services need Waydroid's lxc.cap.keep set; Android 17 netbpfload needs SYSLOG and write access to /dev/kmsg inside this nested Waydroid session.
+  # The binder major is dynamic: allow it in the device cgroup so the private binderfs devices can be opened.
+  binder_major=$(rg -o -r '$1' '^\s*(\d+) binder$' /proc/devices)
+  install -d -m 0700 "$OUT/secrets"; head -c 32 /dev/urandom | base64 >"$OUT/secrets/session.token"
+  docker run -d --name $name --hostname bunos \
+    --cap-drop ALL --cap-add SYS_ADMIN --cap-add SYSLOG --cap-add NET_ADMIN --cap-add NET_RAW --cap-add SETUID --cap-add SETGID \
+    --cap-add CHOWN --cap-add DAC_OVERRIDE --cap-add FOWNER --cap-add KILL --cap-add MKNOD --cap-add SYS_CHROOT \
+    --cap-add SETPCAP --cap-add AUDIT_WRITE --cap-add AUDIT_CONTROL --cap-add SYS_NICE --cap-add WAKE_ALARM \
+    --cap-add BLOCK_SUSPEND --cap-add SYS_PTRACE --cap-add NET_BIND_SERVICE --cap-add DAC_READ_SEARCH \
+    --cap-add FSETID --cap-add SYS_RESOURCE --cap-add IPC_LOCK --security-opt apparmor=unconfined --security-opt seccomp=unconfined \
+    --device /dev/dri --device /dev/kmsg --device-cgroup-rule "c $binder_major:* rwm" \
+    --device /dev/loop-control --device-cgroup-rule "b 7:* rwm" --cap-add BPF --sysctl net.ipv4.ip_forward=1 --cgroupns private --pids-limit 8192 --shm-size 1g --memory 8g --cpus 4 \
+    --tmpfs /run:exec --tmpfs /tmp --tmpfs /var/lib/misc --tmpfs /var/log \
+    -v "$A17:/usr/share/bunos/waydroid/images:ro" -v "$OUT/secrets:/run/secrets:ro" \
+    -v "$name-home:/home/aphrody" \
+    -e BUNOS_SESSION_SIZE=1600x900 -e APHRODY_REMOTE_TOKEN_FILE=/run/secrets/session.token \
+    "${TAG:-bunos-unified:session}" >/dev/null
+  for _ in $(seq 120); do docker exec $name test -f /run/bunos/ready && break; sleep 2; done
+  docker exec $name cat /run/bunos/ready | tee "$OUT/ready.txt"
+  # Same environment as apps started from the COSMIC launcher (cosmic-container-session).
+  u() { docker exec -u 1000 -e HOME=/home/aphrody -e PATH=/usr/libexec/bunos/container-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    -e XDG_CURRENT_DESKTOP=COSMIC -e XDG_RUNTIME_DIR=/run/user/1000 -e DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus "$@"; }
+  a() { docker exec "$name" timeout 30s lxc-attach -P /var/lib/waydroid/lxc -n waydroid -- "/system/bin/$1" "${@:2}"; }
+  # docker cp cannot read tmpfs mounts: stream the screenshot out.
+  shot() { u -e WAYLAND_DISPLAY=wayland-0 "$name" grim - >"$OUT/$1.png"; }
+  docker exec $name sh -c 'command -v grim >/dev/null || { apt-get update -qq && apt-get install -y -qq grim; } >/dev/null 2>&1'
+  sleep 20; shot 01-desktop
+  u -d -e WAYLAND_DISPLAY=wayland-1 $name rio 2>/dev/null || u -d -e WAYLAND_DISPLAY=wayland-1 $name cosmic-term
+  u -d -e WAYLAND_DISPLAY=wayland-1 $name helium --ozone-platform=wayland --no-first-run https://aphrody.com/
+  u -d -e WAYLAND_DISPLAY=wayland-1 $name bunos-launch-webapp https://gemini.google.com/ com.aphrody.webapp.Gemini
+  sleep 25; shot 02-linux-and-web
+  android_booted=
+  for _ in $(seq 180); do
+    android_booted=$(a getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
+    [ "$android_booted" = 1 ] && break
+    sleep 5
+  done
+  if [ "$android_booted" != 1 ]; then
+    docker exec "$name" sh -c 'waydroid status; tail -120 /var/lib/waydroid/waydroid.log; cat /sys/fs/cgroup/cgroup.controllers; cat /sys/fs/cgroup/cgroup.subtree_control; cat /sys/fs/cgroup/cgroup.events' \
+      >"$OUT/android-failure.txt" 2>&1 || true
+    cat "$OUT/android-failure.txt" >&2
+    echo "Android did not finish booting (sys.boot_completed=$android_booted)" >&2
+    exit 1
+  fi
+  printf 'Android PackageManager and provisioning are ready.\n' | tee "$OUT/android.txt"
+  provisioned=
+  for _ in $(seq 180); do
+    provisioned=$(a settings get global bunos_provisioned 2>/dev/null | tr -d '\r' || true)
+    [ "$provisioned" = 1 ] && break
+    sleep 5
+  done
+  [ "$provisioned" = 1 ] || { echo "Android APK provisioning did not finish" >&2; exit 1; }
+  a pm path org.fdroid.fdroid | tee -a "$OUT/android.txt" | grep -Fq package:
+  a pm path com.android.vending | tee -a "$OUT/android.txt" | grep -Fq package:
+  docker exec $name sh -c 'ls /home/aphrody/.local/share/applications/ 2>/dev/null | head -60' | tee -a "$OUT/android.txt"
+  u -d -e WAYLAND_DISPLAY=wayland-1 $name waydroid app launch com.android.vending
+  sleep 40; shot 03-android-window
+  u -d -e WAYLAND_DISPLAY=wayland-1 $name waydroid app launch org.fdroid.fdroid
+  sleep 30; shot 04-fdroid-window
+  docker exec $name sh -c 'for d in /usr/share/applications/*.desktop /home/aphrody/.local/share/applications/*.desktop; do
+      [ -f "$d" ] || continue; n=$(basename "$d"); case "$n" in waydroid.*) k=android;; com.aphrody.webapp.*) k=web;; *) k=linux;; esac
+      echo "$k $n"; done' | sort >"$OUT/launcher-entries.txt"
+  cut -d" " -f1 "$OUT/launcher-entries.txt" | uniq -c | tee "$OUT/launcher-kinds.txt"
+  docker exec $name sh -c 'cat /run/user/1000/cosmic.log | tail -40; tail -20 /var/log/waydroid-container.log' >"$OUT/logs.txt" 2>&1 || true
+  ;;
+disk)
+  IMG=${IMG:-/home/ubuntu/bun-os-disk/unified/bunos-unified.img}
+  FW=${OVMF:-/usr/share/OVMF}
+  cp -f "$FW/OVMF_VARS_4M.fd" "$OUT/vars.fd" 2>/dev/null || cp -f "$FW/OVMF_VARS.fd" "$OUT/vars.fd"
+  CODE=
+  for candidate in "$FW"/OVMF_CODE_4M.fd "$FW"/OVMF_CODE.fd; do
+    if [ -f "$candidate" ]; then CODE=$candidate; break; fi
+  done
+  [ -n "$CODE" ] || { echo "No OVMF_CODE firmware found in $FW" >&2; exit 1; }
+  timeout ${SECS:-600} qemu-system-x86_64 -machine "q35,accel=${QEMU_ACCEL:-kvm}" -cpu "${QEMU_CPU:-host}" -smp 4 -m 6144 \
+    -drive if=pflash,format=raw,readonly=on,file="$CODE" -drive if=pflash,format=raw,file="$OUT/vars.fd" \
+    -drive file="$IMG",format=raw,if=virtio,snapshot=on -netdev user,id=n0 -device virtio-net-pci,netdev=n0 \
+    -device virtio-vga -display none -serial file:"$OUT/serial.log" -monitor unix:"$OUT/monitor.sock",server,nowait &
+  q=$!; sleep ${BOOT_WAIT:-240}
+  echo "screendump $OUT/greeter.ppm" | socat - UNIX-CONNECT:"$OUT/monitor.sock" >/dev/null || true
+  kill $q 2>/dev/null || true
+  grep -E "Reached target|cosmic-greeter|greetd|binderfs|waydroid" "$OUT/serial.log" | tail -20 || true
+  ;;
+esac
+echo "evidence: $OUT"

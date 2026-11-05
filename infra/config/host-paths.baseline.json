@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "$comment": "Host- and machine-specific path ratchet (yolo ops path-audit --repository). Counts may only fall.",
+  "files": {}
+}

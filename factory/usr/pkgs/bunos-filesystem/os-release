@@ -1,0 +1,11 @@
+NAME="Bun OS"
+PRETTY_NAME="Bun OS"
+ID=bunos
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;251;240;223"
+HOME_URL="https://aphrody.app/"
+DOCUMENTATION_URL="https://github.com/aphrody-labs/bun-os"
+SUPPORT_URL="https://github.com/aphrody-labs/bun-os"
+BUG_REPORT_URL="https://github.com/aphrody-labs/bun-os"
+LOGO=bun-os

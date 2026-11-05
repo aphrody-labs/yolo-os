@@ -1,0 +1,46 @@
+{
+  "$comment": "vps: disposition unique des chemins (décision 2026-10-09, voir tools/config/host/host-policy.toml [layout]). Appliquée sur l'hôte ; /srv supprimé.",
+  "schemaVersion": 1,
+  "host": "vps",
+  "home": "/home/ubuntu",
+  "volumes": {
+    "/": "/dev/sda1 (ext4, LABEL cloudimg-rootfs), 300 GiB local disk (~2.1 GB/s random 64k reads), fstab",
+    "/home": "btrfs aphrody-build-da (UUID caa5fa81-f91e-4a6f-a5cf-1847877be57f) over /dev/sdb1 500 GiB + /dev/sdc1 305 GiB additional disks (~15 MB/s random 64k reads), subvol @home, compress=zstd:1, fstab",
+    "/games": "/var/lib/aphrody-games/games.img on / (sparse 180 GiB loop, ext4 casefold, noatime,lazytime), games volume of infra/config/host/apps/vps/gaming, fstab"
+  },
+  "paths": {
+    "~/src": {
+      "kind": "bind",
+      "source": "~/build/workspaces",
+      "note": "une copie git par dépôt : aphrody, bun, forks/<nom>"
+    },
+    "~/apps": {
+      "kind": "bind",
+      "source": "~/build/apps",
+      "note": "runtime des services ; bind et non lien symbolique (checkouts : realpath = chemin déclaré)"
+    },
+    "~/archive": {
+      "kind": "symlink",
+      "target": "~/build/archive",
+      "note": "données froides : dbfr/, dbfr-archive/, k-archive/, tar"
+    },
+    "~/build": { "kind": "dir", "note": "caches, artefacts, locks, workspaces, toolchains de build" },
+    "~/fork-target": { "kind": "symlink", "target": "~/build/fork-target" },
+    "~/xmsvc": { "kind": "symlink", "target": "~/build/xmsvc" },
+    "~/llama-build": { "kind": "symlink", "target": "~/build/llama-build" },
+    "~/tools-build": { "kind": "symlink", "target": "~/build/tools-build" },
+    "~/.cargo/registry": { "kind": "symlink", "target": "~/build/cargo/registry" },
+    "~/.cargo/git": { "kind": "symlink", "target": "~/build/cargo/git" }
+  },
+  "removed": {
+    "/srv": "supprimé (plus de liens de transition)",
+    "~/.git": "dossier vide à la racine du home, supprimé",
+    "/home/omar/src": "lien symbolique vers /home/ubuntu/src (copies omar propres, sans commit non poussé, supprimées)"
+  },
+  "kept": {
+    "~/yolo/w/rel-glibc, ~/yolo/w/rel-musl": "workspaces des builds yolo en cours (conteneur yolo-rel-musl), à déplacer quand le build est arrêté",
+    "~/.codex/.tmp/plugins/.git": "état Codex, non touché",
+    "~/.aphrody/private/native-discord-sdk-*/.git": "état Aphrody privé, non touché",
+    "~/.cache/uv/sdists-v9/.git": "cache uv"
+  }
+}

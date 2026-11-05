@@ -1,0 +1,35 @@
+{
+    "name": "Bun OS Store",
+    "short_name": "Bun OS Store",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#fff7fa",
+    "theme_color": "#7e4d7c",
+    "description": "Bun OS Store and settings, Material 3, Flutter front of the WebOS store API",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

@@ -1,0 +1,9 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# Bun OS gaming session. The compositor setup is the unmodified ChimeraOS gamescope-session-plus
+# (wrapper, systemd user unit, device quirks: factory/upstream/chimeraos-gamescope-session, MIT);
+# Bun OS only supplies the session definition /usr/share/gamescope-session-plus/sessions.d/bunos
+# (the Bun Engine library as the client). Per-machine overrides: BUNOS_* in
+# /etc/gamescope-session-plus/sessions.d/bunos, gamescope flags via GAMESCOPECMD.
+export XDG_CURRENT_DESKTOP=gamescope
+exec /usr/bin/gamescope-session-plus bunos

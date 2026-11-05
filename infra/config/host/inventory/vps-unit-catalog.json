@@ -1,0 +1,15 @@
+{
+  "captured_at": "2026-09-24",
+  "target_alias": "vps",
+  "scope": "unit files matching aphrody-* only; other applications not re-captured",
+  "supersededBy": "tools/config/host/inventory/vps-source.json#last_retirement_observation (2026-09-25T18:06:18Z)",
+  "supersededNote": "This snapshot predates the 2026-09-25 retirement of the Aphrody six-service stack from vps (see tools/config/service-catalog.json status:retired entries and tools/config/host/inventory/vps-source.json). unit_file_state.enabled below reflects the pre-retirement host, not current state.",
+  "unit_file_state": {
+    "enabled": ["aphrody-a2a.service", "aphrody-ai-http.service", "aphrody-site.service", "aphrody-web-api.service"]
+  },
+  "source_parity": "installed units and aphrody-ai-http are byte-identical to systemd/ sources",
+  "active_release": {
+    "aphrody": "/srv/aphrody/releases/20260924T154215Z-62d6deff-bf76b6af"
+  },
+  "mutation_status": "observed-read-only"
+}

@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 2,
+  "kind": "bun-os-images",
+  "observedAt": "2026-10-16",
+  "host": "vps",
+  "remoteRoot": "/home/ubuntu/bun-os-images",
+  "remoteTimeoutSeconds": 7200,
+  "sources": "~/.local/share/bun-os/sources",
+  "pins": {
+    "bun": {
+      "repository": "oven-sh/bun",
+      "version": "1.4.4",
+      "revision": "11c367163a4baa77d3627d14764c376c856a630a",
+      "note": "Official upstream canary bun@1.4.4-canary.20261028.1 (npm @oven/bun-linux-x64, dist.integrity sha512-TZGwV33dDiiHJuszDGUB1QIyB6kTL6WTF0EyZfbNcvAq9kN3wFkhqa6nSyu4SrJtwz6T81+/pgNm4FHzVYIBOw==); same build as factory/usr/pkgs/bun-canary; glibc x86_64 only.",
+      "file": "bun-linux-x64-1.4.4-canary.20261028.1.tgz",
+      "url": "https://registry.npmjs.org/@oven/bun-linux-x64/-/bun-linux-x64-1.4.4-canary.20261028.1.tgz",
+      "sha256": "a9b0e5d28fa06e6ff548da99de85e6e7cfe95a536603b0ad1a9252a906f6796c",
+      "licenseUrl": "https://raw.githubusercontent.com/oven-sh/bun/11c367163a4baa77d3627d14764c376c856a630a/LICENSE.md",
+      "licenseSha256": "5f555cf60a9004284bd44f769953995386c0fc628133f49ea52a2e69b95af3a6"
+    },
+    "bun-musl": {
+      "repository": "oven-sh/bun",
+      "version": "1.4.4",
+      "revision": "11c367163a4baa77d3627d14764c376c856a630a",
+      "note": "Official @oven/bun-linux-x64-musl and @oven/bun-linux-aarch64-musl packages of bun@1.4.4-canary.20261028.1. The Alpine build still requires native target qualification receipts for the exact binaries."
+    },
+    "ubuntu": {
+      "version": "26.10",
+      "file": "ubuntu-base-26.10-base-amd64.tar.gz",
+      "url": "https://cdimage.ubuntu.com/ubuntu-base/releases/26.10/release/ubuntu-base-26.10-base-amd64.tar.gz",
+      "sha256": "ff50c868fa972e956b6406d7efc6e3e47746247f5b301a7c29465e609788c3fc"
+    },
+    "ubuntu-kernel": {
+      "version": "7.3.0-070300rc3",
+      "note": "No 7.3.x stable exists on 2026-10-16 (kernel.org: 7.3-rc7, stable 7.2.11); latest Ubuntu mainline 7.3 build is v7.3-rc3.",
+      "baseUrl": "https://kernel.ubuntu.com/mainline/v7.3-rc3/amd64",
+      "image": {
+        "file": "linux-image-unsigned-7.3.0-070300rc3-generic_7.3.0-070300rc3.202609132247_amd64.deb",
+        "sha256": "5f2788b423366969fb819827aef682854871afb4f4851ef25b8341eef90359dd"
+      },
+      "modules": {
+        "file": "linux-modules-7.3.0-070300rc3-generic_7.3.0-070300rc3.202609132247_amd64.deb",
+        "sha256": "a8569d30cf9a24e38341df57b3d336e5c68121be73481aa22f068f1a21444852"
+      }
+    },
+    "cosmic": {
+      "version": "epoch-1.10.0",
+      "commit": "2780516ab74b8ec3df7b18eebbccac61900738f1",
+      "file": "cosmic-epoch-1.10.0.tar.gz",
+      "url": "https://github.com/pop-os/cosmic-epoch/archive/refs/tags/epoch-1.10.0.tar.gz",
+      "sha256": "f4cd4a347686154eddd5143bf30a6c8ce546b609e99a3c8a84846f5f68ae4e3f",
+      "apt": {
+        "server": "https://apt.pop-os.org/release",
+        "suite": "resolute",
+        "package": "cosmic-session",
+        "packageVersion": "1.10.0~1791314577~26.04~8093b59",
+        "key": "63C46DF0140D738961429F4E204DD8AEC33A7AFF",
+        "note": "Ubuntu 26.10 archive ships no COSMIC; System76 resolute (26.04) archive provides epoch 1.10.0."
+      }
+    },
+    "ubuntu-lts": {
+      "version": "26.04",
+      "image": "ubuntu:26.04@sha256:6a06111c3b0a8600feadb270aec771dc239bf407b25625f93f44ab00e11f4d3c",
+      "note": "Base of bunos-unified: Pop!_OS resolute (26.04) is the COSMIC package source and the native-apps lane builds against 26.04 glibc."
+    },
+    "helium": {
+      "version": "0.20.3.1",
+      "repository": "imputnet/helium-linux",
+      "url": "https://github.com/imputnet/helium-linux/releases/download/0.20.3.1/helium-0.20.3.1-x86_64_linux.tar.xz",
+      "sha256": "3759ea4e95bf4ef4a0a6477e3d73576b0f03906f2e80357275bfc6cacafb5fac",
+      "note": "Upstream release of the source our vendor/helium-linux fork tracks; replaced by the fork build of the Chromium lane once published."
+    },
+    "waydroid-apt": {
+      "version": "resolute",
+      "server": "https://repo.waydro.id/",
+      "key": "7CE0331F71E0A238BB1002D70E406D181DCEE19C",
+      "note": "Only libgbinder, libglibutil and python3-gbinder come from here; Waydroid itself is our vendor/waydroid fork."
+    },
+    "gnome": {
+      "version": "51.1",
+      "file": "gnome-shell-51.1.tar.xz",
+      "url": "https://download.gnome.org/sources/gnome-shell/51/gnome-shell-51.1.tar.xz",
+      "sha256": "c1eb08d9651a567ed5d9b2791371f1898e657cf45e75e1d88adefbab807977d6"
+    },
+    "alpine": {
+      "version": "3.24.2",
+      "file": "alpine-minirootfs-3.24.2-x86_64.tar.gz",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86_64/alpine-minirootfs-3.24.2-x86_64.tar.gz",
+      "sha256": "c5ca053cfe1d85c5b96dff8b9bc57045f7f184a30ffb6b65776409ca90388677",
+      "aarch64Sha256": "9bf70a7f18ea44094cbb5f70c58f9af129c8214745743db0e68e5502cc2ce773"
+    }
+  },
+  "images": {
+    "bunos-gaming": {
+      "usrComposition": "gaming",
+      "agentTooling": {
+        "note": "Claude Code and Codex skills and MCP servers for Omarchy/Arch; installed into /etc/skel/.claude and /etc/skel/.codex.",
+        "packages": ["arch-wiki-docs", "namcap", "expac", "pacman-contrib", "devtools"],
+        "skills": [
+          {
+            "name": "arch-linux",
+            "source": "packages/bun-arch-mcp/skills/arch-linux"
+          },
+          {
+            "name": "omarchy",
+            "repo": "https://github.com/robzolkos/omarchy-skill",
+            "commit": "b093719381635d185716dd2b53ac9a684fe440ec",
+            "path": "."
+          },
+          {
+            "name": "hypruse",
+            "repo": "https://github.com/IlyasKhallouki/hypruse",
+            "commit": "0035d86db6679aca6a341331b8e60033a07d2670",
+            "path": "skills/hypruse"
+          }
+        ],
+        "mcpServers": [
+          {
+            "name": "bun-arch",
+            "command": ["bun", "/usr/share/bun-os/bun-arch-mcp/src/mcp.ts"],
+            "source": "packages/bun-arch-mcp",
+            "env": {
+              "ARCH_WIKI_HTML": "/usr/share/doc/arch-wiki/html"
+            }
+          },
+          {
+            "name": "arch-wiki",
+            "command": [
+              "uv",
+              "tool",
+              "run",
+              "--from",
+              "git+https://github.com/egarcia74/arch-wiki-mcp@5fe91d959ddfa375904f584a5b9264cd15e76720",
+              "arch-wiki-mcp"
+            ]
+          },
+          {
+            "name": "hyprland",
+            "command": [
+              "uv",
+              "tool",
+              "run",
+              "--from",
+              "git+https://github.com/alderban107/hyprland-mcp@2ed3b2103e8852da4fd50d0e4066ec3c63a66572",
+              "hyprland-mcp"
+            ]
+          },
+          {
+            "name": "hypruse",
+            "command": [
+              "uv",
+              "tool",
+              "run",
+              "--from",
+              "git+https://github.com/IlyasKhallouki/hypruse@0035d86db6679aca6a341331b8e60033a07d2670",
+              "hypruse"
+            ]
+          }
+        ]
+      },
+      "platforms": ["linux/amd64"],
+      "targets": {
+        "gaming": "image",
+        "emulation": "image",
+        "bootable": "rootfs"
+      },
+      "blockedTargets": {
+        "bootable": "No explicit kernel composition is selected or qualified; container gaming remains host-kernel based."
+      }
+    },
+    "bunos-omarchy": {
+      "prepare": "omarchy-rootfs",
+      "platforms": ["linux/amd64"],
+      "targets": {
+        "imported-rootfs": "image",
+        "c2w-terminal": "image"
+      },
+      "qualification": {
+        "state": "unqualified",
+        "releaseEligible": false,
+        "scope": "Signed Arch/Omarchy container candidate; separate from the complete Bun OS /usr composition and browser desktop qualification."
+      }
+    },
+    "bunos-alpine": {
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "targets": {
+        "runtime": "image",
+        "edge": "image"
+      }
+    },
+    "bunos-ubuntu": {
+      "platforms": ["linux/amd64"],
+      "targets": {
+        "desktop": "image",
+        "bootable": "rootfs"
+      }
+    },
+    "bunos-unified": {
+      "platforms": ["linux/amd64"],
+      "targets": {
+        "session": "image",
+        "unified": "image"
+      },
+      "repoInputs": [{ "from": "factory/desktop/cosmic-session", "to": "cosmic-session" }],
+      "hostInputs": [
+        {
+          "from": "/home/ubuntu/apps/remote-desktop/dist/aphrody-remote-desktop-linux-x64",
+          "to": "bin/aphrody-remote-desktop",
+          "checksum": "sibling-sha256"
+        },
+        { "from": "/home/ubuntu/native-apps/debs", "to": "debs", "optional": true },
+        { "from": "/home/ubuntu/build/storage/artifacts/bunos-unified/bin", "to": "extra-bin", "optional": true }
+      ]
+    }
+  }
+}

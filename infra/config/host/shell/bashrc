@@ -1,0 +1,43 @@
+# >>> aphrody a2a hub (Bun OS agents; docs/A2A-AGENTS.md). The token stays in the protected file, never in env output.
+export APHRODY_A2A_HUB_URL=http://127.0.0.1:8788
+export APHRODY_A2A_TOKEN_FILE="$HOME/.aphrody/private/a2a/bearer"
+export APHRODY_HOST_ID=vps
+# <<< aphrody a2a hub
+# ~/.bashrc of the Bun OS Linux hosts (vps), versioned as infra/config/host/shell/bashrc (docs/ENVIRONMENT.md).
+# Host-specific (unversioned): ~/.config/aphrody/host.sh. Secrets: ~/.aphrody/private/env/dev.env.
+
+# >>> aphrody-infra toolchain >>>
+# Before the interactive guard, so non-interactive ssh commands get this PATH too.
+export BUN_INSTALL="$HOME/.bun" APHRODY_HOME="$HOME/.aphrody" BUN_OS_ROOT="$HOME/src/bun-os"
+for _d in /usr/local/bin "$HOME/.cargo/bin" "$HOME/.bun/bin" "$HOME/.local/bin"; do
+    case ":$PATH:" in *":$_d:"*) ;; *) PATH="$_d:$PATH" ;; esac
+done
+unset _d
+export PATH
+# <<< aphrody-infra toolchain <<<
+
+[ -r "$HOME/.config/aphrody/host.sh" ] && . "$HOME/.config/aphrody/host.sh"
+
+case $- in *i*) ;; *) return ;; esac
+
+HISTCONTROL=ignoreboth:erasedups HISTSIZE=50000 HISTFILESIZE=100000 HISTTIMEFORMAT='%F %T '
+shopt -s histappend checkwinsize globstar cdspell autocd 2>/dev/null
+PS1='\[\e[01;32m\]\u@\h\[\e[0m\]:\[\e[01;34m\]\w\[\e[0m\]\$ '
+
+if [ -x /usr/bin/dircolors ]; then
+    eval "$(dircolors -b)"
+    alias grep='grep --color=auto'
+fi
+if command -v eza >/dev/null 2>&1; then
+    alias ls='eza --group-directories-first' ll='eza -alF --git --group-directories-first' la='eza -a' lt='eza -T -L2'
+else
+    alias ls='ls --color=auto' ll='ls -alF' la='ls -A'
+fi
+command -v bat >/dev/null 2>&1 && export MANPAGER="sh -c 'col -bx | bat -l man -p'" MANROFFOPT=-c
+[ -f "$HOME/.bash_aliases" ] && . "$HOME/.bash_aliases"
+if ! shopt -oq posix && [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+fi
+
+# Profil Aphrody canonique (PATH dédupliqué, alias git, starship, zoxide, atuin, carapace).
+[ -r "$HOME/.config/aphrody/shell.sh" ] && . "$HOME/.config/aphrody/shell.sh"

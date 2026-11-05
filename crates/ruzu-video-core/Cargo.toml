@@ -1,0 +1,48 @@
+[package]
+name = "video_core"
+publish = false
+version.workspace = true
+edition = "2021"
+
+[features]
+default = ["ffmpeg"]
+# NVDEC video decoding through FFmpeg (libavcodec/libavutil via pkg-config). Without it the
+# decoders report failure, so CPU-only and FFmpeg-less hosts (bun-engine) still build.
+ffmpeg = []
+metal-spirv-validation = ["dep:spirv-cross2"]
+
+[dependencies]
+aphrody-switch = { path = "../aphrody-switch", version = "0.1.1" }
+common.workspace = true
+ruzu_core = { package = "core", path = "../ruzu-core", version = "1.4.7", default-features = false }
+shader_recompiler.workspace = true
+gl.workspace = true
+log = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+ash.workspace = true
+vk-mem.workspace = true
+raw-window-handle.workspace = true
+parking_lot.workspace = true
+rspirv.workspace = true
+spirv.workspace = true
+bitflags.workspace = true
+bytemuck.workspace = true
+libc = { workspace = true }
+smallvec = { workspace = true, features = ["const_generics"] }
+rxbyak = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+block2 = { workspace = true }
+objc2 = { workspace = true }
+objc2-metal.workspace = true
+objc2-quartz-core.workspace = true
+objc2-foundation.workspace = true
+spirv-cross2 = { workspace = true, optional = true }
+
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+spirv-cross2.workspace = true
+
+[build-dependencies]
+cc = { workspace = true }
+pkg-config = { workspace = true }

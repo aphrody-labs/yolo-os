@@ -1,0 +1,42 @@
+[package]
+name = "ruzu_cmd"
+publish = false
+version.workspace = true
+edition = "2021"
+rust-version.workspace = true
+license = "GPL-3.0-or-later"
+
+[lints.rust]
+# `objc` 0.2 expands this legacy feature probe in downstream crates.
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(feature, values("cargo-clippy"))'] }
+
+[features]
+debug-logs = ["ruzu_core/debug-logs"]
+
+[[bin]]
+name = "ruzu-cmd"
+path = "src/main.rs"
+
+[dependencies]
+common = { workspace = true }
+ruzu_core = { package = "core", path = "../ruzu-core", version = "1.4.7" }
+audio_core = { path = "../ruzu-audio-core", version = "1.4.7" }
+hid_core = { path = "../ruzu-hid-core", version = "1.4.7" }
+video_core = { workspace = true }
+input_common = { workspace = true }
+frontend_common = { workspace = true }
+network = { workspace = true }
+parking_lot.workspace = true
+gl = { workspace = true }
+ash = { workspace = true }
+raw-window-handle = { workspace = true }
+clap = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+rdynarmic = { workspace = true }
+libc = { workspace = true }
+regex = { workspace = true }
+sdl3.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc = { workspace = true }

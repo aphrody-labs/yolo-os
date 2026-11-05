@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "proxy": "nginx",
+  "sourceOfTruth": "tools/config/service-catalog.json",
+  "vhostRoot": "$BUN_OS_ROOT/infra/config/host",
+  "routes": [
+    {
+      "host": "omar.aphrody.com",
+      "service": "aphrody-omar-deny",
+      "upstream": "static:403",
+      "probePath": "/",
+      "response": 403,
+      "vhost": "nginx/aphrody/omar.aphrody.com.conf"
+    },
+    {
+      "host": "aphrody.com",
+      "service": "aphrody-webos",
+      "upstream": "127.0.0.1:8790",
+      "probePath": "/api/health",
+      "vhost": "nginx/aphrody/aphrody.com.conf"
+    },
+    {
+      "host": "os.aphrody.com",
+      "service": "aphrody-os",
+      "upstream": "static:301",
+      "probePath": "/",
+      "response": 301,
+      "vhost": "nginx/aphrody/os.aphrody.com.conf"
+    },
+    {
+      "host": "downloads.aphrody.com",
+      "service": "aphrody-downloads",
+      "upstream": "127.0.0.1:8797",
+      "probePath": "/health",
+      "vhost": "nginx/aphrody/downloads.aphrody.com.conf"
+    },
+    {
+      "host": "creator.aphrody.com",
+      "service": "aphrody-creator",
+      "upstream": "static:/home/ubuntu/apps/creator/current",
+      "probePath": "/latest.json",
+      "vhost": "nginx/aphrody/creator.aphrody.com.conf"
+    },
+    {
+      "host": "bun.aphrody.com",
+      "service": "aphrody-bun-site",
+      "upstream": "static:301",
+      "probePath": "/",
+      "response": 301,
+      "vhost": "nginx/aphrody/bun.aphrody.com.conf"
+    },
+    {
+      "host": "cdn.aphrody.com",
+      "service": "aphrody-fonts-proxy",
+      "upstream": "127.0.0.1:8796",
+      "probePath": "/health",
+      "paths": ["/css2", "/css", "/icon", "/s/", "/h/"],
+      "vhost": "nginx/aphrody/cdn.aphrody.com.conf"
+    },
+    {
+      "host": "deploy.aphrody.app",
+      "service": "aphrody-deploy",
+      "upstream": "127.0.0.1:29021",
+      "probePath": "/",
+      "vhost": "nginx/aphrody/deploy.aphrody.app.conf"
+    }
+  ],
+  "internal": [
+    {
+      "service": "aphrody-webos",
+      "upstream": "127.0.0.1:8790",
+      "via": "nginx",
+      "publicHost": "aphrody.com",
+      "paths": ["/api/search"]
+    },
+    {
+      "service": "aphrody-ai-http",
+      "upstream": "127.0.0.1:8789",
+      "via": "nginx",
+      "publicHost": "aphrody.com",
+      "paths": ["/api/v1/models", "/api/v1/rag/query", "/api/v1/rag/stats"],
+      "status": "retired",
+      "retiredAt": "2026-09-25"
+    },
+    {
+      "service": "aphrody-web-api",
+      "upstream": "127.0.0.1:3007",
+      "via": "nginx",
+      "publicHost": "aphrody.com",
+      "paths": ["/api/v1/web/"],
+      "status": "retired",
+      "retiredAt": "2026-09-25"
+    },
+    {
+      "service": "aphrody-bun-os-server",
+      "upstream": "127.0.0.1:29030",
+      "via": "nginx",
+      "publicHost": "source.aphrody.app",
+      "paths": ["/api/product/healthz", "/api/product/v1/"],
+      "note": "Authenticated product namespace on the source.aphrody.app TLS vhost."
+    }
+  ],
+  "policy": "one-nginx-instance-one-route-per-public-service"
+}

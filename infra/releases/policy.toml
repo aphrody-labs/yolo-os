@@ -1,0 +1,44 @@
+# Bun OS release policy (docs/ops/RELEASES.md): Arch-style rolling release. Read by the release tooling.
+schema = 2
+model = "rolling"
+
+[repositories]
+release = "bunos"
+testing = "bunos-testing"
+staging = "bunos-staging"
+promotion_gate = "stage-5 qualification"
+signing = "pacman (gpg)"
+
+[package_managers]
+system = "pacman"
+sandboxed = "flatpak"
+userspace = "bun"
+
+[userland]
+languages = ["rust", "bun"]
+shell = "nushell"
+terminal = "rio"
+desktop = "cosmic"
+prefer_sources = ["redox crates", "uutils", "sudo-rs", "ntpd-rs"]
+
+[iso]
+version = "YYYY.MM.DD"
+cadence = "monthly, 1st"
+
+[kernels]
+linux-bun = "kernel.org mainline: the newest Linus -rc or stable release, whichever is newer (the only kernel; no LTS)"
+source = "rc: Linus's signed tag (git verify-tag, ABAF11C65A2970B130ABE3C479BE3E4300411886); release: cdn.kernel.org tarball + .sign"
+pkgver = "kernel.org version without the dash: 7.4-rc1 -> 7.4rc1, so pacman orders 7.4rc1 < 7.4 < 7.4.1"
+repository = "bunos-testing until qualified, then bunos"
+qualification = "factory/kernel/boot-bun-init.sh (Bun as PID 1, BOOT_MODE=android: binderfs)"
+fragments = ["factory/kernel/linux-bun/aphrody-bun.config", "factory/kernel/linux-bun/android.config"]
+android = "AOSP kernel/configs c/android-6.12 (Android 17), checked by factory/kernel/linux-bun/check-android.ts"
+wsl = "same base, factory/wsl/kernel (Microsoft WSL2 patch series + android.config)"
+rust = true
+llvm = true
+
+[packages]
+scheme = "semver-2.0"
+workspace_version = "1.4.7"
+semver_check = "cargo semver-checks"
+registries = ["crates.io", "npmjs.com"]
