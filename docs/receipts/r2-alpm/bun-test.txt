@@ -1,0 +1,9 @@
+# bun: 1.4.6 at /home/ubuntu/.local/bin/bun
+# bun agent-plugin doctor reports aphrody:true for this binary; the session-start hook warned otherwise. Not reconciled; no reinstall.
+# bun test
+bun test v1.4.6-canary.1 (fd9d7a224)
+
+ 9 pass
+ 0 fail
+ 17 expect() calls
+Ran 9 tests across 1 file. [21.00ms]

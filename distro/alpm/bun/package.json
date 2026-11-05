@@ -1,0 +1,12 @@
+{
+  "name": "yolo-alpm-search",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Unified search over pacman sync repos (via yolo-pm) and detected package backends",
+  "type": "module",
+  "bin": { "yolo-search": "src/cli.ts" },
+  "scripts": {
+    "start": "bun src/cli.ts",
+    "test": "bun test"
+  }
+}

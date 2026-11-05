@@ -1,0 +1,19 @@
+Repository   : cachyos
+Name         : linux-cachyos
+Version      : 7.3.1-1
+Architecture : x86_64
+Description  : The Linux EEVDF + LTO + AutoFDO + Propeller Cachy Sauce Kernel by CachyOS with other patches and improvements. kernel and modules
+URL          : https://github.com/CachyOS/linux-cachyos
+Licenses     : GPL-2.0-only
+Groups       : 
+Download size: 156510569 bytes
+Installed    : 156995596 bytes
+Build date   : 1793782833
+Packager     : CachyOS <admin@cachyos.org>
+SHA-256      : 48246e97bbf6661047c818ac1ec7ed6474873ee637c4b194d73071f709539522
+PGP sig      : present (not verified)
+Provides     : VIRTUALBOX-GUEST-MODULES  WIREGUARD-MODULE  KSMBD-MODULE  V4L2LOOPBACK-MODULE  NTSYNC-MODULE  VHBA-MODULE  ADIOS-MODULE  linux-cachyos-lto=7.3.1-1
+Depends On   : coreutils  kmod  initramfs
+Optional     : wireless-regdb: to set the correct wireless channels of your country  linux-firmware: firmware images needed for some devices  modprobed-db: Keeps track of EVERY kernel module that has ever been probed - useful for those of us who make localmodconfig  scx-scheds: to use sched-ext schedulers
+Conflicts    : 
+Replaces     : linux-cachyos-lto
