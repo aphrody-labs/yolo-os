@@ -1,0 +1,23 @@
+# Android 17 x86_64 Cuttlefish pin for slice r2-android.
+# Source: ci.android.com, branch aosp-android-latest-release, status.json
+#   last_known_good_build for aosp_cf_x86_64_only_phone-userdebug = 16644040 (checked 2026-11-04 23:4x UTC)
+# Hashes: computed locally with sha256sum on download (CI publishes no digest file for these raw artifacts).
+# Artifacts are kept outside the repo: ~/src/yolo-work/artifacts/r2-android/
+# Do not commit the artifacts (>10 MB).
+
+branch=aosp-android-latest-release
+target=aosp_cf_x86_64_only_phone-userdebug
+build_id=16644040
+build_url=https://ci.android.com/builds/submitted/16644040/aosp_cf_x86_64_only_phone-userdebug/latest/
+android_release=17
+build_tag=CP2A.260605.016
+security_patch=2026-06-05
+image_name=aosp_cf_x86_64_only_phone-img-16644040.zip
+image_bytes=1163636385
+image_sha256=eccdb248e171af6cb98711a6f2fbd5e5017e9c3a6e82337580181bbd4bb2c41b
+host_package_name=cvd-host_package.tar.gz
+host_package_bytes=898832924
+host_package_sha256=ec02c8e23985b37d9769732bf8bed992f10d851f40f7a835cf97128888900ecc
+cuttlefish_deb_version=1.57.13
+cuttlefish_deb_sha256_upstream_unmodified=bf1e398678c1117e0d52a3cc7e5377407fcfe3e6d1508c059c3c9c197b24fcf4
+cuttlefish_deb_localfix_sha256=01528005048af26a14e143f02a40f2b8684e4827edf4678b30fa8de80f810835
