@@ -1,0 +1,23 @@
+[package]
+name = "cargo-lfs"
+version = "2026.1.0"
+edition = "2024"
+rust-version = "1.85"
+license.workspace = true
+description = "Rust-native LFS research, source, and ALFS orchestration CLI"
+
+[[bin]]
+name = "cargo-lfs"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4.6.7", features = ["derive"] }
+hex = "0.4"
+reqwest = { version = "0.13.5", default-features = false, features = ["blocking", "json", "rustls"] }
+scraper = "0.29.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.154"
+sha2 = "0.10"
+url = { version = "2.5", features = ["serde"] }

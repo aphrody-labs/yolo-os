@@ -23,7 +23,7 @@ third-party package manuals or other external documentation.
 The official [ALFS project](https://www.linuxfromscratch.org/alfs/) and its
 `jhalfs` implementation transforms book instructions into scripts and a
 Makefile, can download sources and supports resumption. Its configuration has a
-`RUNMAKE` switch; `lfs-bun alfs generate` refuses to run if the saved
+`RUNMAKE` switch; the Rust `cargo lfs alfs generate` refuses to run if the saved
 configuration enables it. This prepares generated scripts
 and a Makefile without starting the package build. The source checkout commit
 is recorded. Host prerequisites include Git, Bash, make, Python, `xmllint`,
@@ -37,11 +37,12 @@ add a review boundary for unusual instructions. It should not invent its own
 parser for all shell blocks or assume every Beyond Linux From Scratch (BLFS)
 chapter is uniformly automatable.
 
-The Bun integration generated the selected LFS 13.1 systemd scripts and
-Makefile in an isolated Debian 13 Docker environment on 2026-11-04. jhalfs
-reported the host prerequisite checks as passing; packages were not downloaded
-and the build was not run. The jhalfs and book commits, Makefile digest and
-output counts are in the [generation record](research/alfs-generation-2026-11-04.md).
+Before the Rust port, the earlier Bun integration generated the selected LFS
+13.1 systemd scripts and Makefile in an isolated Debian 13 Docker environment
+on 2026-11-04. This is historical ALFS evidence, not a validation of the Rust
+CLI. jhalfs reported the host prerequisite checks as passing; packages were not
+downloaded and the build was not run. The jhalfs and book commits, Makefile
+digest and output counts are in the [generation record](research/alfs-generation-2026-11-04.md).
 
 The live LFS site also lists BLFS, MLFS, GLFS and SLFS alongside the base book,
 plus Hints, Patches and the Editor's Guide. LFS homepage describes ALFS as its
