@@ -1,0 +1,195 @@
+{
+  "id": "aphrody-googlebook-2026",
+  "name": "Aphrody OS — 2026 GoogleBook Laptop (Aluminium OS + Chromium OS + Android 17 x64)",
+  "version": "2026.11.0",
+  "organization": "aphrody-labs",
+  "productBrand": "Aphrody",
+  "domain": "os.aphrody.com",
+  "coreLibraryScope": "yolo",
+  "productScope": ["@aphrody/*", "aphrody-*"],
+  "summary": "Sovereign 2026 GoogleBook Laptop Operating System converging Aluminium OS (unified Android Desktop + ChromeOS windowing shell), Chromium OS system services, Android 17 (API 37 Baklava/CinnamonBun) x86_64 Google Play container/ARCVM bridge, Linux 7.4-rc kernel, memory-safe Rust userland, and Upstream Bun v1.4.4+.",
+  "kernel": {
+    "version": "7.4.0-rc1-aphrody-googlebook",
+    "arch": ["x86_64", "aarch64"],
+    "scheduler": "sched_ext (scx_lavd / scx_rusty eBPF)",
+    "security": ["dm-verity", "Landlock ABI v6", "seccomp-bpf", "minijail0"],
+    "subsystems": [
+      "binder_linux (Android IPC)",
+      "ashmem / memfd",
+      "kvm + crosvm (ARCVM & Crostini)",
+      "virtio-wayland / virtio-gpu-venus (Vulkan 1.4)",
+      "virtio-snd (PipeWire low-latency audio)",
+      "accel/ivpu & amdxdna (NPU DMA-BUF zero-copy)"
+    ]
+  },
+  "initAndRuntime": {
+    "pid1": "bunos-init (Rust + Upstream Bun v1.4.4+ supervisor)",
+    "bunVersion": ">=1.4.4",
+    "rustUserland": {
+      "coreutils": "uutils-coreutils",
+      "findutils": "uutils-findutils",
+      "privilege": "sudo-rs",
+      "search": "ripgrep",
+      "packageManager": "yolo-os pkg (yolo-bun unified 25-backend resolver)"
+    }
+  },
+  "androidSubsystem": {
+    "version": "Android 17",
+    "apiLevel": 37,
+    "codename": "Baklava / CinnamonBun",
+    "abi": "x86_64",
+    "imageFlavor": "google_apis_playstore_x86_64",
+    "isolationRuntime": "ARCVM (crosvm) + Waydroid zero-copy Wayland bridge",
+    "graphicsBridge": "virtio-gpu Rutabaga / GFXStream Vulkan 1.4 + WebGPU",
+    "packageManagers": ["play-store", "fdroid", "adb"],
+    "preinstalledApps": [
+      {
+        "id": "play-store",
+        "packageName": "com.android.vending",
+        "name": "Google Play Store / Aphrody Play",
+        "url": "https://play.aphrody.com"
+      },
+      {
+        "id": "search",
+        "packageName": "com.aphrody.android.googlequicksearchbox",
+        "name": "Aphrody Search & Lens",
+        "url": "https://aphrody.com/search"
+      },
+      {
+        "id": "gemini",
+        "packageName": "com.aphrody.android.apps.bard",
+        "name": "Aphrody AI / Gemini",
+        "url": "https://ai.aphrody.com"
+      },
+      {
+        "id": "drive",
+        "packageName": "com.aphrody.android.apps.docs",
+        "name": "Aphrody Drive + Spacedrive",
+        "url": "https://drive.aphrody.com"
+      },
+      {
+        "id": "docs",
+        "packageName": "com.aphrody.android.apps.docs.editors.docs",
+        "name": "Docs / WordCraft",
+        "url": "https://docs.aphrody.com"
+      },
+      {
+        "id": "sheets",
+        "packageName": "com.aphrody.android.apps.docs.editors.sheets",
+        "name": "Sheets / GridCraft",
+        "url": "https://sheets.aphrody.com"
+      },
+      {
+        "id": "slides",
+        "packageName": "com.aphrody.android.apps.docs.editors.slides",
+        "name": "Slides / DeckCraft",
+        "url": "https://slides.aphrody.com"
+      },
+      {
+        "id": "mail",
+        "packageName": "com.aphrody.android.gm",
+        "name": "Aphrody Mail",
+        "url": "https://mail.aphrody.com"
+      },
+      {
+        "id": "meet",
+        "packageName": "com.aphrody.android.apps.tachyon",
+        "name": "Aphrody Meet",
+        "url": "https://meet.aphrody.com"
+      },
+      {
+        "id": "photos",
+        "packageName": "com.aphrody.android.apps.photos",
+        "name": "Aphrody Photos (PhotoCraft / LightCraft)",
+        "url": "https://photos.aphrody.com"
+      },
+      {
+        "id": "translate",
+        "packageName": "com.aphrody.android.apps.translate",
+        "name": "Aphrody Translate",
+        "url": "https://translate.aphrody.com"
+      },
+      {
+        "id": "maps",
+        "packageName": "com.aphrody.android.apps.maps",
+        "name": "Aphrody Maps",
+        "url": "https://maps.aphrody.com"
+      },
+      {
+        "id": "video",
+        "packageName": "com.aphrody.android.youtube",
+        "name": "Aphrody Video (FilmCraft)",
+        "url": "https://video.aphrody.com"
+      }
+    ]
+  },
+  "chromiumOsServices": {
+    "cli": "crosh (Chromium OS Developer Shell)",
+    "vmController": "vmc (Virtual Machine Controller for ARCVM, Borealis, Bruschetta, Crostini)",
+    "daemons": [
+      {
+        "name": "concierge",
+        "role": "Manages lifecycle of crosvm instances (Android 17 ARCVM & Linux containers)"
+      },
+      {
+        "name": "seneschal",
+        "role": "9p / virtio-fs file sharing broker between host Spacedrive VFS and guest VMs"
+      },
+      {
+        "name": "sommelier",
+        "role": "Nested Wayland compositor & XWayland DPI/input forwarding bridge"
+      },
+      {
+        "name": "minijail0",
+        "role": "Process sandboxing with namespaces, seccomp-bpf, and Landlock policies"
+      },
+      {
+        "name": "patchpanel",
+        "role": "Virtual networking, mDNS, VPN, and ADB-over-vsock routing for ARCVM"
+      }
+    ],
+    "browserShell": "Ash / Lacros / CEF Chromium 142+ with @yolo-web/google & Aphrody Identity"
+  },
+  "aluminiumOsShell": {
+    "codename": "Aluminium OS 2026",
+    "architecture": "Unified Android 17 Desktop Mode + ChromeOS Ash/Views + yolo-ui Wayland Compositor",
+    "designSystem": {
+      "colorSpace": "HCT/CAM16",
+      "preset": "aphrody",
+      "evolvingGradient": ["#4285F4", "#9B72CB", "#D96570", "#F4B400"],
+      "aphrodyPalette": {
+        "gold": "#FFD700",
+        "violet": "#7C5CFF",
+        "cyan": "#00D4FF",
+        "deepNavy": "#17335C",
+        "petMauveSeed": "#8C6C88"
+      }
+    },
+    "windowManagement": [
+      "Freeform desktop snapping & tiling (Hyprland / COSMIC / CrOS Ash parity)",
+      "Seamless side-by-side WebGPU PWAs, native Rust wgpu apps, and Android 17 APKs",
+      "Global 9-dot Aphrody Apps Waffle Launcher & Everything Button (Search + Gemini AI)"
+    ]
+  },
+  "hardwareProfile": {
+    "model": "2026 GoogleBook Laptop (Aphrody Reference Edition)",
+    "tiers": [
+      {
+        "id": "googlebook-pro-x64",
+        "cpu": "AMD Ryzen AI 9 HX / Intel Core Ultra Series 3 (x86_64)",
+        "gpu": "Vulkan 1.4 + WebGPU native (RDNA 3.5 / Xe2)",
+        "npu": "50+ TOPS XDNA2 / NPU4 (yolo-ai local GGUF/WebGPU inference)",
+        "memory": "32 GB LPDDR5X-8533",
+        "display": "14.2-inch 3.2K 120Hz OLED (Display P3 / HDR1000)"
+      },
+      {
+        "id": "googlebook-air-arm64",
+        "cpu": "Snapdragon X2 Elite / Tensor G6 Laptop (aarch64)",
+        "gpu": "Vulkan 1.4 + WebGPU native",
+        "npu": "65+ TOPS Hexagon / Google TPU Edge",
+        "memory": "24 GB LPDDR5X",
+        "display": "13.6-inch 2.8K 120Hz LTPO OLED"
+      }
+    ]
+  }
+}
