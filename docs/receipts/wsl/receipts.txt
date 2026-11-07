@@ -1,0 +1,159 @@
+# receipts generated 2026-11-05T00:16:10Z
+
+$ id
+uid=1000(yolo) gid=1000(yolo) groups=1000(yolo),998(wheel)
+[exit 0]
+
+$ uname -a
+Linux APHRODY 6.18.54.1-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Tue Oct  6 19:13:07 UTC 2026 x86_64 GNU/Linux
+[exit 0]
+
+$ cat /etc/os-release
+NAME="Arch Linux"
+PRETTY_NAME="Arch Linux"
+ID=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;23;147;209"
+HOME_URL="https://archlinux.org/"
+DOCUMENTATION_URL="https://wiki.archlinux.org/"
+SUPPORT_URL="https://bbs.archlinux.org/"
+BUG_REPORT_URL="https://gitlab.archlinux.org/groups/archlinux/-/issues"
+PRIVACY_POLICY_URL="https://terms.archlinux.org/docs/privacy-policy/"
+LOGO=archlinux-logo
+[exit 0]
+
+$ cat /etc/wsl.conf
+# Managed by YOLO setup-in-distro.sh
+[boot]
+systemd=true
+
+[user]
+default=yolo
+
+# Keep the distro userland self-contained: without this, WSL appends the
+# Windows PATH (including any Windows node/npm) to every Linux shell.
+[interop]
+appendWindowsPath=false
+[exit 0]
+
+$ ps -p 1 -o comm=; systemctl is-system-running
+systemd
+running
+[exit 0]
+
+$ command -v ls; readlink -f "$(command -v ls)"; ls --version
+/usr/local/bin/ls
+/usr/bin/uu-ls
+ls (uutils coreutils) 0.12.0
+[exit 0]
+
+$ /usr/local/sbin/yolo-uutils-shim status
+enabled: 107 shims (manifest /var/lib/yolo/uutils-shims.list)
+[exit 0]
+
+$ command -v sudo; readlink -f "$(command -v sudo)"; sudo --version
+/usr/local/bin/sudo
+/usr/bin/sudo-rs
+sudo-rs 0.2.15
+[exit 0]
+
+$ sudo -n true && echo sudo-noninteractive-ok
+sudo-noninteractive-ok
+[exit 0]
+
+$ sudo -n id -u
+0
+[exit 0]
+
+$ nix --version
+nix (Nix) 2.35.4
+[exit 0]
+
+$ systemctl is-active nix-daemon; systemctl is-active nix-daemon.socket
+active
+active
+[exit 0]
+
+$ nix store info
+Store URL: daemon
+Version: 2.35.4
+Trusted: 0
+[exit 0]
+
+$ nix config show experimental-features
+fetch-tree flakes nix-command
+[exit 0]
+
+$ rustup --version 2>/dev/null; rustup show active-toolchain
+rustup 1.29.2 (2026-10-22)
+stable-x86_64-unknown-linux-gnu (default)
+[exit 0]
+
+$ rustc -V; cargo -V
+rustc 1.99.1 (58cf8f9c3 2026-10-13)
+cargo 1.99.1 (5f94df478 2026-08-27)
+[exit 0]
+
+$ command -v bun; bun --version; bun --revision
+/home/yolo/.bun/bin/bun
+1.4.4
+1.4.4+38afee6c8
+[exit 0]
+
+$ uv --version
+uv 0.13.7 (316c827e0 2026-11-03 x86_64-unknown-linux-gnu)
+[exit 0]
+
+$ clang --version | head -1
+clang version 23.1.4
+[exit 0]
+
+$ zig version
+0.17.0
+[exit 0]
+
+$ command -v node npm || echo "node/npm: absent"
+node/npm: absent
+[exit 0]
+
+$ nix run nixpkgs#hello
+unpacking 'https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst' into the Git cache...
+these 5 paths will be fetched (11.0 MiB download, 36.7 MiB unpacked):
+  /nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57
+  /nix/store/pa6rydwgjxxmmvdxap7qk9c85h8jbimy-hello-2.12.3
+  /nix/store/00fs4zz9c0jjcvs62wg39b91dydz7zqb-libidn2-2.3.8
+  /nix/store/bx7jdvkba26sy20ryr4l617qqmzj9hff-libunistring-1.4.2
+  /nix/store/pkkjnyk4z46n18fkyqwlg24p272apb69-xgcc-16.2.0-libgcc
+copying path '/nix/store/pkkjnyk4z46n18fkyqwlg24p272apb69-xgcc-16.2.0-libgcc' from 'https://cache.nixos.org'...
+copying path '/nix/store/bx7jdvkba26sy20ryr4l617qqmzj9hff-libunistring-1.4.2' from 'https://cache.nixos.org'...
+copying path '/nix/store/00fs4zz9c0jjcvs62wg39b91dydz7zqb-libidn2-2.3.8' from 'https://cache.nixos.org'...
+copying path '/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57' from 'https://cache.nixos.org'...
+copying path '/nix/store/pa6rydwgjxxmmvdxap7qk9c85h8jbimy-hello-2.12.3' from 'https://cache.nixos.org'...
+Hello, world!
+[exit 0]
+
+$ nix eval --raw nixpkgs#hello.outPath
+/nix/store/pa6rydwgjxxmmvdxap7qk9c85h8jbimy-hello-2.12.3[exit 0]
+
+$ nix flake metadata nixpkgs --json | bun -e "const m=JSON.parse(await Bun.stdin.text()); console.log(m.resolvedUrl ?? m.url, m.locked?.rev, m.locked?.narHash)"
+https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst 9d3b8db48266c17be0b5f9c6360c3ecfbac3d1f5 sha256-WqewjvVjGQ1yhAvxeZW7IKoIT08vUNfyaeZewOwyYxg=
+[exit 0]
+
+$ pacman -Q sudo-rs uutils-coreutils nix rustup clang zig uv linux-api-headers glibc systemd pacman
+sudo-rs 0.2.15-1
+uutils-coreutils 0.12.0-1
+nix 2.35.4-1
+rustup 1.29.2-1
+clang 23.1.4-1
+zig 0.17.0-1
+uv 0.13.7-1
+linux-api-headers 7.3-1
+glibc 2.44+r50+g1848099f063e-1
+systemd 262.1-1
+pacman 7.1.0.r9.g54d9411-3
+[exit 0]
+
+$ df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sdg       1007G  4.6G  952G   1% /
+[exit 0]

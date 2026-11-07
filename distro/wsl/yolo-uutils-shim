@@ -1,0 +1,65 @@
+#!/bin/bash
+# yolo-uutils-shim: put uutils-coreutils first in PATH, reversibly.
+#
+# Arch's uutils-coreutils installs /usr/bin/uu-<name> with no `provides`, so
+# GNU coreutils stays installed and owned by pacman. This script only adds
+# symlinks /usr/local/bin/<name> -> /usr/bin/uu-<name> (Arch PATH puts
+# /usr/local/bin before /usr/bin) and records them in a manifest so that
+# `disable` removes exactly what `enable` created.
+#
+#   yolo-uutils-shim enable    create the shims
+#   yolo-uutils-shim disable   remove the shims listed in the manifest
+#   yolo-uutils-shim status    list active shims
+set -euo pipefail
+
+BIN=/usr/local/bin
+MANIFEST=/var/lib/yolo/uutils-shims.list
+# Never shadow these: `[` is a shell builtin anyway and sudo/su belong to sudo-rs.
+SKIP=" [ "
+
+enable() {
+  install -d -m 0755 "$(dirname "$MANIFEST")"
+  : >"$MANIFEST.new"
+  for src in /usr/bin/uu-*; do
+    name=${src##*/uu-}
+    case "$SKIP" in *" $name "*) continue ;; esac
+    dst="$BIN/$name"
+    if [ -e "$dst" ] && [ ! -L "$dst" ]; then
+      echo "skip $dst: regular file exists" >&2
+      continue
+    fi
+    if [ -L "$dst" ] && [ "$(readlink "$dst")" != "$src" ]; then
+      echo "skip $dst: foreign symlink -> $(readlink "$dst")" >&2
+      continue
+    fi
+    ln -sfn "$src" "$dst"
+    echo "$dst" >>"$MANIFEST.new"
+  done
+  mv "$MANIFEST.new" "$MANIFEST"
+  hash -r 2>/dev/null || true
+  echo "enabled $(wc -l <"$MANIFEST") uutils shims"
+}
+
+disable() {
+  [ -f "$MANIFEST" ] || { echo "no manifest, nothing to do"; return 0; }
+  n=0
+  while IFS= read -r dst; do
+    if [ -L "$dst" ] && [[ "$(readlink "$dst")" == /usr/bin/uu-* ]]; then
+      rm -f "$dst"; n=$((n + 1))
+    fi
+  done <"$MANIFEST"
+  rm -f "$MANIFEST"
+  echo "removed $n uutils shims"
+}
+
+status() {
+  [ -f "$MANIFEST" ] || { echo "disabled"; return 0; }
+  echo "enabled: $(wc -l <"$MANIFEST") shims (manifest $MANIFEST)"
+}
+
+case "${1:-status}" in
+  enable) enable ;;
+  disable) disable ;;
+  status) status ;;
+  *) echo "usage: $0 enable|disable|status" >&2; exit 2 ;;
+esac
