@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+workspace = "../.."
+name = "aphrody-subsystem"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors = ["aphrody-code"]
+repository = "https://github.com/aphrody-labs/bun-os/tree/main/crates/aphrody-subsystem"
+license = "Apache-2.0"
+description = "The Aphrody subsystem contract: MCP tools, skills (parameterised tool sequences), a sub-agent routine and the shared event bus."
+readme = "README.md"
+keywords = ["mcp", "agent", "subsystem", "skills", "event-bus"]
+categories = ["asynchronous", "api-bindings"]
+publish = true
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+unused_must_use = "deny"
+non_ascii_idents = "deny"
+
+[lints.clippy]
+todo = "deny"
+unimplemented = "deny"
+dbg_macro = "deny"
+correctness = { level = "warn", priority = -1 }
+perf = { level = "warn", priority = -1 }
+
+[dependencies]
+async-trait = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio = { workspace = true, features = ["full"] }
+
+# The agent bus only uses broadcast sync on wasm; do not pull host I/O features.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+tokio = { workspace = true, features = ["sync"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }

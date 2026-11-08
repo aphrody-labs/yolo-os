@@ -1,0 +1,152 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b10">
+<title>Android</title>
+<style>
+*{box-sizing:border-box}
+:root{color-scheme:dark;font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;background:#090b10;color:#f5f6fa}
+html,body{margin:0;width:100%;height:100%;height:100dvh;background:#090b10;overflow:hidden}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#c{display:block;margin:auto;max-width:100%;max-height:100%;touch-action:none;outline:none}
+#c:focus-visible{outline:2px solid #a5b4fc;outline-offset:-4px}
+#bar{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));max-width:min(78vw,42rem);padding:10px 14px;border:1px solid #343844;border-radius:999px;background:rgb(17 19 26 / 94%);color:#f5f6fa;font-size:13px;line-height:1.4;box-shadow:0 8px 28px rgb(0 0 0 / 35%);pointer-events:none}
+#tools{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center;padding:8px;border:1px solid #343844;border-radius:18px;background:rgb(17 19 26 / 96%);box-shadow:0 8px 28px rgb(0 0 0 / 40%);max-width:calc(100vw - 24px)}
+#tools input{width:min(48vw,24em);min-width:0;height:48px;padding:0 14px;background:#0c0e14;color:#f5f6fa;border:1px solid #555d70;border-radius:12px;font:inherit}
+#tools input::placeholder{color:#c2c7d2}
+input,button{font:inherit}
+button{min-width:48px;min-height:48px;padding:0 16px;background:#c7d2fe;color:#111827;border:1px solid #c7d2fe;border-radius:12px;font-weight:650;cursor:pointer;transition:background-color 140ms ease,border-color 140ms ease,transform 140ms ease}
+button:hover{background:#e0e7ff;border-color:#e0e7ff}
+button:active{transform:scale(.98)}
+button:focus-visible,input:focus-visible{outline:3px solid #a5b4fc;outline-offset:3px}
+@media(max-width:560px){#bar{top:max(8px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));font-size:12px;padding:8px 12px;border-radius:14px}#tools{left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:max(8px,env(safe-area-inset-bottom));justify-content:flex-end}#tools input{flex:1;width:auto}}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+@media(forced-colors:active){#bar,#tools{border:1px solid CanvasText}button:focus-visible,input:focus-visible,#c:focus-visible{outline:2px solid CanvasText;outline-offset:3px}}
+</style>
+</head>
+<body>
+<canvas id="c" tabindex="0"></canvas>
+<div id="bar" role="status" aria-live="polite">Connecting to Bun OS…</div>
+<div id="tools"><button id="text-toggle" type="button" aria-label="Open text keyboard" aria-expanded="false">Text keyboard</button><input id="text-entry" type="text" aria-label="Text to send to Android" placeholder="Type into Android…" autocomplete="off" enterkeyhint="send" hidden><button id="text-send" type="button" hidden>Send</button></div>
+<script>
+"use strict";
+const canvas = document.getElementById("c"), bar = document.getElementById("bar");
+const ctx = canvas.getContext("2d");
+try { localStorage.removeItem("aphrody.android.token"); } catch {}
+let ws, decoder, codec, frames = 0, fps = 0, lastInput = 0, latency = 0, buttons = 0;
+const gamepadBefore = Array(4).fill(null);
+let gamepadLabel = "no gamepad";
+setInterval(() => { fps = frames; frames = 0; bar.textContent = `${canvas.width}x${canvas.height} ${fps} fps, input-to-frame ${latency} ms · ${gamepadLabel}`; }, 1000);
+const send = (m) => ws && ws.readyState === 1 && ws.send(JSON.stringify(m));
+function configure(c) {
+  if (decoder) try { decoder.close(); } catch {}
+  codec = c;
+  decoder = new VideoDecoder({
+    output: (frame) => {
+      if (canvas.width !== frame.displayWidth || canvas.height !== frame.displayHeight) { canvas.width = frame.displayWidth; canvas.height = frame.displayHeight; }
+      ctx.drawImage(frame, 0, 0); frame.close(); frames++;
+      if (lastInput) { latency = Math.round(performance.now() - lastInput); lastInput = 0; }
+    },
+    error: (e) => { bar.textContent = "decoder: " + e.message; },
+  });
+  decoder.configure({ codec: c, optimizeForLatency: true, hardwareAcceleration: "prefer-hardware" });
+}
+let pendingConfig = null;
+async function start() {
+  bar.textContent = "Checking Google owner session…";
+  let session;
+  try {
+    const response = await fetch("/api/sessions", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ width: screen.width, height: screen.height }) });
+    if (response.status === 401) { location.assign("/api/google/session/login"); return; }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    session = await response.json();
+  } catch (e) { bar.textContent = `Could not start Bun OS session: ${e.message}`; return; }
+  const proto = location.protocol === "https:" ? "wss:" : "ws:";
+  ws = new WebSocket(`${proto}//${location.host}${session.stream}`, ["bearer." + session.token]);
+  ws.binaryType = "arraybuffer";
+  ws.onmessage = (ev) => {
+    if (typeof ev.data === "string") {
+      const m = JSON.parse(ev.data);
+      if (m.t === "video" && m.codec && m.codec !== codec) configure(m.codec);
+      else if (m.t === "clipboard" && m.text) navigator.clipboard?.writeText(m.text).catch(() => {});
+      else if (m.t === "error") bar.textContent = m.message;
+      return;
+    }
+    const b = new Uint8Array(ev.data), kind = b[0];
+    const pts = Number(new DataView(ev.data).getBigUint64(1));
+    const data = b.subarray(9);
+    if (kind === 1) { pendingConfig = data.slice(); return; }
+    if (!decoder || decoder.state !== "configured") return;
+    let chunk = data;
+    if (kind === 2 && pendingConfig) { chunk = new Uint8Array(pendingConfig.length + data.length); chunk.set(pendingConfig); chunk.set(data, pendingConfig.length); pendingConfig = null; }
+    decoder.decode(new EncodedVideoChunk({ type: kind === 2 ? "key" : "delta", timestamp: pts, data: chunk }));
+  };
+  ws.onclose = (e) => {
+    if (e.code === 1006 || e.code === 1000) {
+      fetch(`/api/sessions/${session.id}`, { method: "DELETE", credentials: "same-origin", keepalive: true }).finally(() => setTimeout(() => location.reload(), 1500));
+    }
+  };
+}
+function pos(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x: (e.clientX - r.left) / r.width * canvas.width, y: (e.clientY - r.top) / r.height * canvas.height };
+}
+function pointer(e) { lastInput = performance.now(); send({ t: "pointer", ...pos(e), buttons }); }
+canvas.addEventListener("pointerdown", (e) => { canvas.focus(); canvas.setPointerCapture(e.pointerId); buttons |= e.button === 2 ? 2 : 1; pointer(e); });
+canvas.addEventListener("pointermove", (e) => { if (buttons) pointer(e); });
+canvas.addEventListener("pointerup", (e) => { buttons &= ~(e.button === 2 ? 2 : 1); pointer(e); });
+canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+canvas.addEventListener("wheel", (e) => { e.preventDefault(); send({ t: "wheel", dx: e.deltaX, dy: e.deltaY }); }, { passive: false });
+const key = (down) => (e) => { if (e.key === "v" && (e.ctrlKey || e.metaKey)) return; e.preventDefault(); lastInput = performance.now(); send({ t: "key", code: e.code, key: e.key, down }); };
+canvas.addEventListener("keydown", key(true));
+canvas.addEventListener("keyup", key(false));
+document.addEventListener("paste", (e) => { const text = e.clipboardData?.getData("text/plain"); if (text) send({ t: "clipboard", text }); });
+const textEntry = document.getElementById("text-entry"), textSend = document.getElementById("text-send");
+document.getElementById("text-toggle").onclick = () => {
+  textEntry.hidden = !textEntry.hidden; textSend.hidden = textEntry.hidden;
+  document.getElementById("text-toggle").setAttribute("aria-expanded", String(!textEntry.hidden));
+  if (!textEntry.hidden) textEntry.focus(); else canvas.focus();
+};
+function sendText() {
+  if (textEntry.value) { send({ t: "clipboard", text: textEntry.value }); textEntry.value = ""; }
+  textEntry.focus();
+}
+textSend.onclick = sendText;
+textEntry.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); sendText(); } });
+// The browser receives USB/Bluetooth controllers locally; send bounded standard-mapping snapshots to
+// the authenticated Android stream. Android maps buttons and the left stick to KeyEvent/DPAD input.
+setInterval(() => {
+  if (!navigator.getGamepads) return;
+  let pads = [];
+  try { pads = navigator.getGamepads(); } catch { return; }
+  const names = [];
+  for (let pad = 0; pad < 4; pad++) {
+    const source = pads[pad];
+    if (!source || !source.connected) {
+      if (gamepadBefore[pad] !== null) {
+        send({ t: "gamepad", pad, connected: false, buttons: Array(17).fill(0), axes: [0, 0, 0, 0] });
+        gamepadBefore[pad] = null;
+      }
+      continue;
+    }
+    names.push(source.id || `controller ${pad + 1}`);
+    const state = {
+      t: "gamepad", pad, connected: true,
+      buttons: Array.from({ length: 17 }, (_, i) => source.buttons[i]?.value ?? 0),
+      axes: Array.from({ length: 4 }, (_, i) => source.axes[i] ?? 0),
+    };
+    const before = gamepadBefore[pad];
+    const changed = !before || state.buttons.some((v, i) => Math.abs(v - before.buttons[i]) > 0.03)
+      || state.axes.some((v, i) => Math.abs(v - before.axes[i]) > 0.03);
+    if (changed) { send(state); gamepadBefore[pad] = state; lastInput = performance.now(); }
+  }
+  gamepadLabel = names.length ? names.join(", ") : "no gamepad";
+}, 50);
+if (!("VideoDecoder" in window)) bar.textContent = "This browser has no WebCodecs VideoDecoder.";
+start();
+</script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+// SPDX-License-Identifier: Apache-2.0
+//! The Bun OS session and the stream bridge (ADR-003). One session type: the unified Bun OS desktop. Until the
+//! container session manager (bollard, one container of the unified image per user) lands, the session is the
+//! desktop stream the host declares:
+//!
+//!   WEBOS_SESSION=ws://127.0.0.1:<port>/<path>     stream endpoint
+//!   WEBOS_SESSION_TOKEN_FILE=/path/to/token         its access token
+//!   WEBOS_SESSION_MODE=native                       the upstream speaks aphrody-webos-protocol (Input JSON in,
+//!                                                   ServerEvent JSON and frames out); otherwise the
+//!                                                   aphrody-remote-desktop wire is translated
+//!
+//! `POST /api/sessions` hands out a session id and a per-session bearer token; `GET /api/sessions/{id}/stream`
+//! (WebSocket, subprotocol `bearer.<token>`) bridges the client to the upstream; binary frames pass through.
+
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+
+use aphrody_webos_protocol::{
+    ApiError, Input, ServerEvent, SessionAvailability, SessionInfo, SessionState, StartSession,
+};
+use axum::{
+    Json, Router,
+    extract::{
+        Path, State,
+        ws::{CloseFrame, Message as WsMessage, WebSocket, WebSocketUpgrade, close_code},
+    },
+    http::{HeaderMap, StatusCode},
+    response::{IntoResponse, Response},
+    routing::{get, post},
+};
+use futures_util::{SinkExt, StreamExt};
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode};
+use serde::Deserialize;
+use serde_json::json;
+use tokio::sync::watch;
+use tokio_tungstenite::tungstenite::Message as UpMessage;
+
+const SESSION_COOKIE: &str = "aphrody_session";
+const SESSION_ISSUER: &str = "aphrody.com";
+const SESSION_AUDIENCE: &str = "bunos-webos";
+
+#[derive(Deserialize)]
+struct OwnerClaims {
+    sub: String,
+}
+
+fn owner_authenticated(headers: &HeaderMap) -> bool {
+    if !headers
+        .get(axum::http::header::ORIGIN)
+        .and_then(|origin| origin.to_str().ok())
+        .is_some_and(|origin| origin == "https://aphrody.com")
+    {
+        return false;
+    }
+    let Some(secret) = std::env::var("APHRODY_WEBOS_SESSION_KEY")
+        .ok()
+        .filter(|s| s.len() >= 32)
+    else {
+        return false;
+    };
+    let token = headers
+        .get(axum::http::header::COOKIE)
+        .and_then(|h| h.to_str().ok())
+        .into_iter()
+        .flat_map(|cookies| cookies.split(';'))
+        .filter_map(|cookie| cookie.trim().split_once('='))
+        .find_map(|(name, value)| (name == SESSION_COOKIE).then_some(value));
+    let Some(token) = token else { return false };
+    let mut validation = Validation::new(Algorithm::HS256);
+    validation.set_issuer(&[SESSION_ISSUER]);
+    validation.set_audience(&[SESSION_AUDIENCE]);
+    validation.set_required_spec_claims(&["exp", "iss", "aud", "sub"]);
+    decode::<OwnerClaims>(
+        token,
+        &DecodingKey::from_secret(secret.as_bytes()),
+        &validation,
+    )
+    .is_ok_and(|data| !data.claims.sub.is_empty())
+}
+
+#[derive(Clone)]
+struct Upstream {
+    url: String,
+    token: Option<String>,
+    /// Upstream speaks the client protocol: forward both ways unchanged, authenticate with a bearer header.
+    native: bool,
+}
+
+struct Session {
+    token: String,
+}
+
+#[derive(Clone)]
+pub struct Sessions {
+    upstream: Option<Upstream>,
+    live: Arc<Mutex<HashMap<String, Session>>>,
+    /// Becomes true when the server starts draining (SIGTERM, Ctrl-C): bridges close with 1001 Going Away and new
+    /// sessions are refused, so clients reconnect to the next process.
+    draining: watch::Receiver<bool>,
+}
+
+fn random_hex(bytes: usize) -> String {
+    let mut buf = vec![0u8; bytes];
+    getrandom::fill(&mut buf).expect("system randomness");
+    buf.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+impl Sessions {
+    pub fn from_env(draining: watch::Receiver<bool>) -> Sessions {
+        let upstream = std::env::var("WEBOS_SESSION")
+            .ok()
+            .filter(|u| !u.is_empty())
+            .map(|url| Upstream {
+                url,
+                token: std::env::var("WEBOS_SESSION_TOKEN_FILE")
+                    .ok()
+                    .and_then(|path| std::fs::read_to_string(path).ok())
+                    .map(|t| t.trim().to_owned())
+                    .filter(|t| !t.is_empty()),
+                native: std::env::var("WEBOS_SESSION_MODE").is_ok_and(|m| m == "native"),
+            });
+        Sessions {
+            upstream,
+            live: Arc::new(Mutex::new(HashMap::new())),
+            draining,
+        }
+    }
+
+    fn draining(&self) -> bool {
+        *self.draining.borrow()
+    }
+
+    /// TCP reachability of the declared desktop stream (host and port of `WEBOS_SESSION`), within `deadline`.
+    pub async fn probe(&self, deadline: std::time::Duration) -> Result<(), String> {
+        let Some(upstream) = &self.upstream else {
+            return Err("no Bun OS desktop stream is declared on this host (WEBOS_SESSION)".into());
+        };
+        let uri: axum::http::Uri = upstream
+            .url
+            .parse()
+            .map_err(|e| format!("bad desktop stream address: {e}"))?;
+        let host = uri
+            .host()
+            .ok_or_else(|| "the desktop stream address has no host".to_owned())?
+            .trim_start_matches('[')
+            .trim_end_matches(']')
+            .to_owned();
+        let port = uri
+            .port_u16()
+            .unwrap_or(if uri.scheme_str() == Some("wss") {
+                443
+            } else {
+                80
+            });
+        match tokio::time::timeout(
+            deadline,
+            tokio::net::TcpStream::connect((host.as_str(), port)),
+        )
+        .await
+        {
+            Ok(Ok(_)) => Ok(()),
+            Ok(Err(e)) => Err(format!(
+                "the desktop stream at {host}:{port} is unreachable: {e}"
+            )),
+            Err(_) => Err(format!(
+                "the desktop stream at {host}:{port} did not answer within {} ms",
+                deadline.as_millis()
+            )),
+        }
+    }
+
+    pub fn availability(&self) -> SessionAvailability {
+        SessionAvailability {
+            available: self.upstream.is_some(),
+            reason: self
+                .upstream
+                .is_none()
+                .then(|| "The Bun OS desktop is not running on this host yet.".into()),
+        }
+    }
+
+    pub fn configured(&self) -> bool {
+        self.upstream.is_some()
+    }
+}
+
+/// RFC 9457 problem; `error` keeps the protocol's `ApiError` readable by existing clients.
+fn error(status: StatusCode, message: &str) -> Response {
+    let legacy = serde_json::to_value(ApiError {
+        error: message.into(),
+    })
+    .unwrap_or_default();
+    aphrody_http_error::api::problem_with(status, message, legacy)
+}
+
+async fn availability(State(sessions): State<Sessions>) -> Json<SessionAvailability> {
+    Json(sessions.availability())
+}
+
+async fn start(
+    State(sessions): State<Sessions>,
+    headers: HeaderMap,
+    Json(_request): Json<StartSession>,
+) -> Response {
+    if !owner_authenticated(&headers) {
+        return error(
+            StatusCode::UNAUTHORIZED,
+            "Sign in with the Bun OS owner Google account first.",
+        );
+    }
+    if sessions.upstream.is_none() {
+        return error(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "The Bun OS desktop is not running on this host yet.",
+        );
+    }
+    if sessions.draining() {
+        return error(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "The server is restarting; try again in a moment.",
+        );
+    }
+    let id = random_hex(8);
+    let token = random_hex(24);
+    sessions
+        .live
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .insert(
+            id.clone(),
+            Session {
+                token: token.clone(),
+            },
+        );
+    let info = SessionInfo {
+        stream: format!("/api/sessions/{id}/stream"),
+        id,
+        state: SessionState::Running,
+        token,
+    };
+    (StatusCode::CREATED, Json(info)).into_response()
+}
+
+async fn stop(
+    State(sessions): State<Sessions>,
+    headers: HeaderMap,
+    Path(id): Path<String>,
+) -> Response {
+    if !owner_authenticated(&headers) {
+        return error(
+            StatusCode::UNAUTHORIZED,
+            "Sign in with the Bun OS owner Google account first.",
+        );
+    }
+    match sessions
+        .live
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .remove(&id)
+    {
+        Some(_) => StatusCode::NO_CONTENT.into_response(),
+        None => error(StatusCode::NOT_FOUND, "No such session."),
+    }
+}
+
+async fn stream(
+    State(sessions): State<Sessions>,
+    Path(id): Path<String>,
+    headers: HeaderMap,
+    upgrade: WebSocketUpgrade,
+) -> Response {
+    if !owner_authenticated(&headers) {
+        return error(
+            StatusCode::UNAUTHORIZED,
+            "Sign in with the Bun OS owner Google account first.",
+        );
+    }
+    let offered = headers
+        .get("sec-websocket-protocol")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or_default()
+        .split(',')
+        .map(str::trim)
+        .find_map(|p| p.strip_prefix("bearer."))
+        .map(str::to_owned);
+    let upstream = {
+        let live = sessions
+            .live
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        match (live.get(&id), offered.as_deref()) {
+            (Some(session), Some(token)) if session.token == token => sessions.upstream.clone(),
+            (Some(_), _) => {
+                return error(
+                    StatusCode::UNAUTHORIZED,
+                    "This session token was not accepted.",
+                );
+            }
+            (None, _) => return error(StatusCode::NOT_FOUND, "No such session."),
+        }
+    };
+    let Some(upstream) = upstream else {
+        return error(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "The session is no longer available.",
+        );
+    };
+    if sessions.draining() {
+        return error(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "The server is restarting; try again in a moment.",
+        );
+    }
+    let protocol = format!("bearer.{}", offered.unwrap_or_default());
+    let draining = sessions.draining.clone();
+    upgrade
+        .protocols([protocol])
+        .on_upgrade(move |socket| bridge(socket, upstream, draining))
+}
+
+/// Remote-desktop wire messages for one protocol input; `buttons` keeps the last DOM button mask.
+fn translate(input: Input, buttons: &mut u8) -> Vec<serde_json::Value> {
+    match input {
+        Input::Pointer { x, y, buttons: now } => {
+            let mut out = vec![json!({ "type": "mouse_move", "x": x, "y": y })];
+            for (bit, name) in [(1u8, "left"), (2, "right"), (4, "middle")] {
+                let (was, is) = (*buttons & bit != 0, now & bit != 0);
+                if is && !was {
+                    out.push(json!({ "type": "mouse_down", "button": name }));
+                } else if was && !is {
+                    out.push(json!({ "type": "mouse_up", "button": name }));
+                }
+            }
+            *buttons = now;
+            out
+        }
+        Input::Wheel { dx, dy } => vec![json!({ "type": "wheel", "dx": dx, "dy": dy })],
+        Input::Key { code, down, .. } => vec![json!({ "type": "key", "code": code, "down": down })],
+        // The remote-desktop backends type clipboard text into the focused window.
+        Input::Clipboard { text } => vec![json!({ "type": "text", "text": text })],
+        Input::Resize { .. } | Input::Gamepad(_) => Vec::new(),
+    }
+}
+
+async fn bridge(socket: WebSocket, upstream: Upstream, mut draining: watch::Receiver<bool>) {
+    use tokio_tungstenite::tungstenite::client::IntoClientRequest;
+    let url = match (&upstream.token, upstream.native) {
+        (Some(token), false) => {
+            format!(
+                "{}{}token={token}",
+                upstream.url,
+                if upstream.url.contains('?') { '&' } else { '?' }
+            )
+        }
+        _ => upstream.url.clone(),
+    };
+    let (mut client_tx, mut client_rx) = socket.split();
+    let mut request = match url.as_str().into_client_request() {
+        Ok(request) => request,
+        Err(e) => {
+            let event = ServerEvent::Error {
+                message: format!("bad desktop stream address: {e}"),
+            };
+            let _ = client_tx
+                .send(WsMessage::Text(
+                    serde_json::to_string(&event).unwrap_or_default().into(),
+                ))
+                .await;
+            return;
+        }
+    };
+    if let (Some(token), true) = (&upstream.token, upstream.native)
+        && let Ok(value) = format!("Bearer {token}").parse()
+    {
+        request.headers_mut().insert("authorization", value);
+    }
+    let native = upstream.native;
+    let remote = match tokio_tungstenite::connect_async(request).await {
+        Ok((remote, _)) => remote,
+        Err(e) => {
+            let event = ServerEvent::Error {
+                message: format!("the desktop stream is unreachable: {e}"),
+            };
+            let _ = client_tx
+                .send(WsMessage::Text(
+                    serde_json::to_string(&event).unwrap_or_default().into(),
+                ))
+                .await;
+            return;
+        }
+    };
+    if !native {
+        let state = ServerEvent::State {
+            state: SessionState::Running,
+        };
+        let _ = client_tx
+            .send(WsMessage::Text(
+                serde_json::to_string(&state).unwrap_or_default().into(),
+            ))
+            .await;
+    }
+    let (mut remote_tx, mut remote_rx) = remote.split();
+    let down = async {
+        loop {
+            let message = tokio::select! {
+                message = remote_rx.next() => match message {
+                    Some(Ok(message)) => message,
+                    _ => break,
+                },
+                // Shutdown: tell the client to reconnect (1001 Going Away) instead of dropping the TCP stream.
+                () = async { let _ = draining.wait_for(|draining| *draining).await; } => {
+                    let _ = client_tx
+                        .send(WsMessage::Close(Some(CloseFrame {
+                            code: close_code::AWAY,
+                            reason: "server restarting".into(),
+                        })))
+                        .await;
+                    break;
+                }
+            };
+            let forwarded = match message {
+                UpMessage::Binary(frame) => WsMessage::Binary(frame),
+                UpMessage::Text(text) if native => WsMessage::Text(text.as_str().into()),
+                UpMessage::Close(_) => break,
+                // hello/config replies of the remote-desktop wire are not part of the client protocol.
+                _ => continue,
+            };
+            if client_tx.send(forwarded).await.is_err() {
+                break;
+            }
+        }
+    };
+    let up = async {
+        let mut buttons = 0u8;
+        while let Some(Ok(message)) = client_rx.next().await {
+            let WsMessage::Text(text) = message else {
+                if matches!(message, WsMessage::Close(_)) {
+                    break;
+                }
+                continue;
+            };
+            if native {
+                if remote_tx
+                    .send(UpMessage::Text(text.as_str().into()))
+                    .await
+                    .is_err()
+                {
+                    return;
+                }
+                continue;
+            }
+            let Ok(input) = serde_json::from_str::<Input>(&text) else {
+                continue;
+            };
+            for wire in translate(input, &mut buttons) {
+                if remote_tx
+                    .send(UpMessage::Text(wire.to_string().into()))
+                    .await
+                    .is_err()
+                {
+                    return;
+                }
+            }
+        }
+    };
+    tokio::select! {
+        () = down => {}
+        () = up => {}
+    }
+}
+
+/// Request/response routes: they run under the request timeout of the server.
+pub fn router(sessions: Sessions) -> Router {
+    Router::new()
+        .route("/api/session", get(availability))
+        .route("/api/sessions", post(start))
+        .route("/api/sessions/{id}", axum::routing::delete(stop))
+        .with_state(sessions)
+}
+
+/// The WebSocket stream: long-lived, so it is merged outside the request timeout.
+pub fn stream_router(sessions: Sessions) -> Router {
+    Router::new()
+        .route("/api/sessions/{id}/stream", get(stream))
+        .with_state(sessions)
+}

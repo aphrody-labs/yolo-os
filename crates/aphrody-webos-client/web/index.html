@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="app dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#17130b" />
+    <title>Aphrody</title>
+    <meta name="description" content="Bun OS in your browser: the COSMIC desktop with Android apps, Redox, Wine and Proton, streamed from Bun OS and drawn by a Rust WebAssembly client on WebGPU." />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://aphrody.com/" />
+    <link rel="describedby" type="text/markdown" href="/llms.txt" title="llms.txt" />
+
+    <!-- Icons and installation -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="application-name" content="Aphrody" />
+    <meta name="apple-mobile-web-app-title" content="Aphrody" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Sharing: Open Graph (Facebook, LinkedIn, WhatsApp, Telegram, Discord, Slack, iMessage) and X -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Aphrody" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://aphrody.com/" />
+    <meta property="og:title" content="Aphrody" />
+    <meta property="og:description" content="The COSMIC desktop with Android apps, Redox, Wine and Proton, streamed from Bun OS to any tab." />
+    <meta property="og:image" content="https://aphrody.com/og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Aphrody: Byron Love portrait and the Bun OS desktop in your browser" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Aphrody" />
+    <meta name="twitter:description" content="The COSMIC desktop with Android apps, Redox, Wine and Proton, streamed from Bun OS to any tab." />
+    <meta name="twitter:image" content="https://aphrody.com/og.png" />
+    <meta name="twitter:image:alt" content="Aphrody: Byron Love portrait and the Bun OS desktop in your browser" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://aphrody.com/#org",
+            "name": "Aphrody",
+            "url": "https://aphrody.com/",
+            "logo": "https://aphrody.com/icons/icon-512.png",
+            "email": "contact@aphrody.com",
+            "sameAs": ["https://github.com/aphrody-labs"]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://aphrody.com/#site",
+            "name": "Aphrody",
+            "url": "https://aphrody.com/",
+            "inLanguage": "en",
+            "publisher": { "@id": "https://aphrody.com/#org" }
+          },
+          {
+            "@type": "WebApplication",
+            "name": "Bun OS",
+            "url": "https://aphrody.com/",
+            "applicationCategory": "OperatingSystem",
+            "operatingSystem": "Any (browser with WebAssembly)",
+            "browserRequirements": "Requires WebAssembly; WebGPU recommended",
+            "image": "https://aphrody.com/og.png",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+            "publisher": { "@id": "https://aphrody.com/#org" }
+          }
+        ]
+      }
+    </script>
+
+    <link rel="preload" href="/aphrody_webos_client_bg.wasm" as="fetch" type="application/wasm" crossorigin fetchpriority="high" />
+    <link rel="modulepreload" href="/aphrody_webos_client.js" />
+    <link rel="stylesheet" href="/site.css" />
+    <style>
+      /* First paint before /site.css (M3 roles, components): the dark surface the iced/libcosmic canvas also uses. */
+      html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #17130b; color: #ebe1d4; }
+    </style>
+  </head>
+  <body>
+    <main id="landing">
+      <div class="identity">
+        <div class="pet" role="img" aria-label="Aphrody, the pet"></div>
+        <h1>Aphrody</h1>
+        <p class="tagline">Bun OS in your browser</p>
+      </div>
+      <p>One desktop, COSMIC with Android apps inside it, plus Redox, Wine and Proton, streamed from Bun OS to this tab and drawn by a Rust WebAssembly client on WebGPU.</p>
+      <ul aria-label="What runs inside">
+        <li>COSMIC desktop</li><li>Android apps</li><li>Redox OS</li><li>Wine and Proton</li><li>Emulators</li><li>Gemini</li>
+      </ul>
+      <div class="row">
+        <button type="button" class="filled" data-action="install" hidden>Install the app</button>
+        <button type="button" class="tonal" data-action="share">Share</button>
+      </div>
+      <nav aria-labelledby="share-label">
+        <p class="share-label" id="share-label">Share on</p>
+        <div class="row">
+          <a class="button chip" data-share="x" href="https://x.com/intent/post?url=https%3A%2F%2Faphrody.com%2F">X</a>
+          <a class="button chip" data-share="bluesky" href="https://bsky.app/intent/compose?text=https%3A%2F%2Faphrody.com%2F">Bluesky</a>
+          <a class="button chip" data-share="linkedin" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Faphrody.com%2F">LinkedIn</a>
+          <a class="button chip" data-share="facebook" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Faphrody.com%2F">Facebook</a>
+          <a class="button chip" data-share="reddit" href="https://www.reddit.com/submit?url=https%3A%2F%2Faphrody.com%2F">Reddit</a>
+          <a class="button chip" data-share="whatsapp" href="https://wa.me/?text=https%3A%2F%2Faphrody.com%2F">WhatsApp</a>
+          <a class="button chip" data-share="telegram" href="https://t.me/share/url?url=https%3A%2F%2Faphrody.com%2F">Telegram</a>
+        </div>
+      </nav>
+      <nav class="links" aria-label="Site">
+        <a href="/status">Status</a><a href="/privacy">Privacy and storage</a><a href="/llms.txt">llms.txt</a><a href="https://github.com/aphrody-labs/bun-os">Source code</a>
+      </nav>
+      <p class="loading" id="gpu" role="status">Loading the desktop</p>
+    </main>
+    <noscript>aphrody.com runs a WebAssembly client; enable JavaScript to load it.</noscript>
+    <script type="module" src="/site.js"></script>
+    <script type="module" src="/boot.js"></script>
+  </body>
+</html>
