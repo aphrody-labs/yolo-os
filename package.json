@@ -6,7 +6,12 @@
   "license": "MIT",
   "type": "module",
   "workspaces": [
-    "packages/windows-winrt"
+    "packages/bun-os-platform",
+    "packages/bunos-run",
+    "packages/wasmos",
+    "packages/bun-os-plugins",
+    "packages/update",
+    "packages/waydroid"
   ],
   "engines": {
     "bun": ">=1.4.4"
