@@ -13,16 +13,16 @@ RFB (Remote Framebuffer) protocol encoding implementations for VNC.
 
 **Support this project:**
 
-[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-❤-red?style=flat&logo=github-sponsors)](https://github.com/sponsors/dustinmcafee)
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor--red?style=flat&logo=github-sponsors)](https://github.com/sponsors/dustinmcafee)
 [![PayPal](https://img.shields.io/badge/PayPal-Donate-blue?style=flat&logo=paypal)](https://paypal.me/dustinmcafee)
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-☕-yellow?style=flat&logo=buy-me-a-coffee)](https://buymeacoffee.com/dustinmcafee)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee--yellow?style=flat&logo=buy-me-a-coffee)](https://buymeacoffee.com/dustinmcafee)
 [![Bitcoin](https://img.shields.io/badge/Bitcoin-₿-orange?style=flat&logo=bitcoin)](#crypto-donations)
 [![Ethereum](https://img.shields.io/badge/Ethereum-Ξ-blue?style=flat&logo=ethereum)](#crypto-donations)
 [![Solana](https://img.shields.io/badge/Solana-◎-purple?style=flat&logo=solana)](#crypto-donations)
 [![Monero](https://img.shields.io/badge/Monero-XMR-grey?style=flat&logo=monero)](#crypto-donations)
 
 <details>
-<summary id="crypto-donations">💰 Crypto Donations</summary>
+<summary id="crypto-donations"> Crypto Donations</summary>
 
 **Bitcoin (BTC)**
 ```
@@ -52,16 +52,16 @@ This crate provides encoding implementations for the VNC/RFB protocol, including
 
 | Encoding | ID | Description | Wire Format Match | Testing Status |
 |----------|----|----|-------------------|----------------|
-| **Raw** | 0 | Uncompressed pixels | ✅ 100% | ✅ Golden + Round-trip |
-| **RRE** | 2 | Rise-and-Run-length | ✅ 100% | ✅ Smoke |
-| **CoRRE** | 4 | Compact RRE | ✅ 100% | ✅ Smoke |
-| **Hextile** | 5 | 16x16 tile-based | ✅ 100% | ✅ Smoke |
-| **Zlib** | 6 | Zlib-compressed raw | ✅ 100% | ✅ Golden + Round-trip |
-| **Tight** | 7 | Multi-mode compression | ✅ 100% (all 5 modes) | ✅ Golden |
-| **ZlibHex** | 8 | Zlib-compressed Hextile | ✅ 100% | ✅ Smoke |
-| **ZRLE** | 16 | Zlib Run-Length | ✅ 100% | ✅ Golden + Round-trip |
-| **ZYWRLE** | 17 | Wavelet compression | ✅ 100% | ✅ Smoke |
-| **TightPng** | -260 | PNG-compressed Tight | ✅ 100% | ✅ Golden |
+| **Raw** | 0 | Uncompressed pixels |  100% |  Golden + Round-trip |
+| **RRE** | 2 | Rise-and-Run-length |  100% |  Smoke |
+| **CoRRE** | 4 | Compact RRE |  100% |  Smoke |
+| **Hextile** | 5 | 16x16 tile-based |  100% |  Smoke |
+| **Zlib** | 6 | Zlib-compressed raw |  100% |  Golden + Round-trip |
+| **Tight** | 7 | Multi-mode compression |  100% (all 5 modes) |  Golden |
+| **ZlibHex** | 8 | Zlib-compressed Hextile |  100% |  Smoke |
+| **ZRLE** | 16 | Zlib Run-Length |  100% |  Golden + Round-trip |
+| **ZYWRLE** | 17 | Wavelet compression |  100% |  Smoke |
+| **TightPng** | -260 | PNG-compressed Tight |  100% |  Golden |
 
 All 10 encodings have automated tests. See [Testing](#testing) for details.
 
